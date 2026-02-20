@@ -22,18 +22,19 @@ h1 {
 
 /* --- Tabs --- */
 .tab-buttons {
-    display: flex;
-    flex-wrap: wrap;
-    justify-content: center;
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(140px, 1fr));
+    gap: 8px;
+    justify-items: center;
     margin-bottom: 20px;
 }
 
 .tab-buttons button {
-    padding: 10px 20px;
-    margin: 5px;
+    width: 100%;
+    padding: 10px 0;
     border: none;
     border-radius: 12px;
-    background-color: #1e40af;
+    background-color: #1e40af; /* default blue for NBA */
     color: white;
     font-weight: bold;
     cursor: pointer;
@@ -41,7 +42,16 @@ h1 {
 }
 
 .tab-buttons button.active {
-    background-color: #2563eb;
+    background-color: #2563eb; /* active blue */
+}
+
+/* --- EPL Tab Buttons --- */
+#btn-epl-box, #btn-epl-summary {
+    background-color: #059669; /* emerald green */
+}
+
+#btn-epl-box.active, #btn-epl-summary.active {
+    background-color: #10b981; /* brighter green when active */
 }
 
 /* --- Tab Content --- */
@@ -56,6 +66,10 @@ h1 {
     padding: 15px;
     margin-bottom: 20px;
     box-shadow: 0 2px 6px rgba(0,0,0,0.15);
+}
+
+#eplBox .team-card, #eplSummary .scroll-box {
+    background-color: #d1fae5; /* light green for EPL */
 }
 
 .team-card h3 {
