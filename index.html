@@ -14,6 +14,7 @@ nav button {
   background:#457b9d;
   color:white;
   font-size:16px;
+  cursor:pointer;
 }
 nav button.active { background:#1d3557; }
 .section { display:none; padding:15px; }
@@ -30,6 +31,7 @@ select { width:100%; }
   border:none;
   font-size:16px;
   margin-top:10px;
+  cursor:pointer;
 }
 .summary-box {
   max-height:200px;
@@ -46,12 +48,12 @@ select { width:100%; }
 <header>Sports Stat Tracker</header>
 
 <nav>
-  <button onclick="showTab('nba')" class="active">NBA Boxscore</button>
-  <button onclick="showTab('epl')">EPL Match</button>
-  <button onclick="showTab('summary')">Summary</button>
+  <button id="btnNBA" class="active" onclick="showTab('nba')">NBA Boxscore</button>
+  <button id="btnEPL" onclick="showTab('epl')">EPL Match</button>
+  <button id="btnSummary" onclick="showTab('summary')">Summary</button>
 </nav>
 
-<!-- NBA SECTION -->
+<!-- NBA -->
 <div id="nba" class="section active">
 <h2>NBA Boxscore</h2>
 
@@ -72,7 +74,7 @@ select { width:100%; }
 <button class="publish-btn" onclick="publishNBA()">Publish NBA Game</button>
 </div>
 
-<!-- EPL SECTION -->
+<!-- EPL -->
 <div id="epl" class="section">
 <h2>EPL Match</h2>
 
@@ -107,7 +109,7 @@ select { width:100%; }
 
 <script>
 
-const nbaTeams = [
+var nbaTeams = [
 "Atlanta Hawks","Boston Celtics","Brooklyn Nets","Charlotte Hornets",
 "Chicago Bulls","Cleveland Cavaliers","Dallas Mavericks","Denver Nuggets",
 "Detroit Pistons","Golden State Warriors","Houston Rockets","Indiana Pacers",
@@ -119,84 +121,128 @@ const nbaTeams = [
 "Utah Jazz","Washington Wizards"
 ];
 
-const eplTeams = [
+var eplTeams = [
 "Arsenal","Aston Villa","Bournemouth","Brentford","Brighton",
 "Chelsea","Crystal Palace","Everton","Fulham","Liverpool",
 "Luton Town","Manchester City","Manchester United","Newcastle",
 "Nottingham Forest","Sheffield United","Tottenham","West Ham","Wolves"
 ];
 
-let players = JSON.parse(localStorage.getItem("players")) || {};
-let teams = JSON.parse(localStorage.getItem("teams")) || {};
+var players = JSON.parse(localStorage.getItem("players") || "{}");
+var teams = JSON.parse(localStorage.getItem("teams") || "{}");
 
 function showTab(id){
-  document.querySelectorAll('.section').forEach(s=>s.classList.remove('active'));
-  document.getElementById(id).classList.add('active');
-  document.querySelectorAll('nav button').forEach(b=>b.classList.remove('active'));
-  event.target.classList.add('active');
+  var sections = document.getElementsByClassName("section");
+  for(var i=0;i<sections.length;i++){
+    sections[i].classList.remove("active");
+  }
+  document.getElementById(id).classList.add("active");
+
+  document.getElementById("btnNBA").classList.remove("active");
+  document.getElementById("btnEPL").classList.remove("active");
+  document.getElementById("btnSummary").classList.remove("active");
+
+  if(id==="nba") document.getElementById("btnNBA").classList.add("active");
+  if(id==="epl") document.getElementById("btnEPL").classList.add("active");
+  if(id==="summary") document.getElementById("btnSummary").classList.add("active");
 }
 
-function fillSelect(id, list){
-  const sel = document.getElementById(id);
-  list.forEach(team=>{
-    const opt = document.createElement("option");
-    opt.value = team;
-    opt.textContent = team;
+function fillSelect(id,list){
+  var sel=document.getElementById(id);
+  for(var i=0;i<list.length;i++){
+    var opt=document.createElement("option");
+    opt.value=list[i];
+    opt.text=list[i];
     sel.appendChild(opt);
-  });
+  }
 }
 
 function makeDropdown(){
-  const select = document.createElement("select");
-  for(let i=0;i<=100;i++){
-    const opt = document.createElement("option");
+  var select=document.createElement("select");
+  for(var i=0;i<=100;i++){
+    var opt=document.createElement("option");
     opt.value=i;
-    opt.textContent=i;
+    opt.text=i;
     select.appendChild(opt);
   }
   return select;
 }
 
 function buildNBATable(id){
-  const table = document.getElementById(id);
-  table.innerHTML = "<tr><th>Name</th><th>PTS</th><th>REB</th><th>AST</th><th>STL</th><th>BLK</th></tr>";
-  for(let i=0;i<10;i++){
-    const row = document.createElement("tr");
-    row.innerHTML="<td><input></td>";
-    for(let j=0;j<5;j++){
-      const td=document.createElement("td");
-      td.appendChild(makeDropdown());
-      row.appendChild(td);
+  var table=document.getElementById(id);
+  table.innerHTML="<tr><th>Name</th><th>PTS</th><th>REB</th><th>AST</th><th>STL</th><th>BLK</th></tr>";
+  for(var i=0;i<10;i++){
+    var row=document.createElement("tr");
+    var cell=document.createElement("td");
+    var input=document.createElement("input");
+    cell.appendChild(input);
+    row.appendChild(cell);
+    for(var j=0;j<5;j++){
+      var statCell=document.createElement("td");
+      statCell.appendChild(makeDropdown());
+      row.appendChild(statCell);
     }
     table.appendChild(row);
   }
 }
 
 function buildEPLTable(id){
-  const table = document.getElementById(id);
-  table.innerHTML = "<tr><th>Name</th><th>Goals</th><th>Assists</th></tr>";
-  for(let i=0;i<11;i++){
-    const row = document.createElement("tr");
-    row.innerHTML="<td><input></td>";
-    for(let j=0;j<2;j++){
-      const td=document.createElement("td");
-      td.appendChild(makeDropdown());
-      row.appendChild(td);
+  var table=document.getElementById(id);
+  table.innerHTML="<tr><th>Name</th><th>Goals</th><th>Assists</th></tr>";
+  for(var i=0;i<11;i++){
+    var row=document.createElement("tr");
+    var cell=document.createElement("td");
+    var input=document.createElement("input");
+    cell.appendChild(input);
+    row.appendChild(cell);
+    for(var j=0;j<2;j++){
+      var statCell=document.createElement("td");
+      statCell.appendChild(makeDropdown());
+      row.appendChild(statCell);
     }
     table.appendChild(row);
   }
 }
 
-function addPlayer(name, stats){
+function addPlayer(name,stats){
   if(!name) return;
-  if(!players[name]) players[name]={games:0,...stats};
-  else{
-    for(let key in stats){
-      players[name][key]=(players[name][key]||0)+stats[key];
-    }
-    players[name].games++;
+
+  if(!players[name]){
+    players[name]={games:0};
   }
+
   players[name].games++;
+
+  for(var key in stats){
+    if(!players[name][key]) players[name][key]=0;
+    players[name][key]+=stats[key];
+  }
+}
+
+function processTable(id,statKeys){
+  var rows=document.getElementById(id).rows;
+  for(var i=1;i<rows.length;i++){
+    var name=rows[i].cells[0].children[0].value;
+    if(!name) continue;
+
+    var statObj={};
+    for(var j=0;j<statKeys.length;j++){
+      statObj[statKeys[j]]=parseInt(rows[i].cells[j+1].children[0].value);
+    }
+    addPlayer(name,statObj);
+  }
+}
+
+function recordTeam(teamId,winId){
+  var team=document.getElementById(teamId).value;
+  var win=document.getElementById(winId).checked;
+
+  if(!teams[team]){
+    teams[team]={wins:0,losses:0};
+  }
+
+  if(win) teams[team].wins++;
+  else teams[team].losses++;
 }
 
 function publishNBA(){
@@ -204,7 +250,7 @@ function publishNBA(){
   processTable("nbaTable2",["pts","reb","ast","stl","blk"]);
   recordTeam("nbaTeam1","nbaWin1");
   recordTeam("nbaTeam2","nbaWin2");
-  save();
+  saveData();
 }
 
 function publishEPL(){
@@ -212,31 +258,10 @@ function publishEPL(){
   processTable("eplTable2",["goals","assists"]);
   recordTeam("eplTeam1","eplWin1");
   recordTeam("eplTeam2","eplWin2");
-  save();
+  saveData();
 }
 
-function processTable(id, statKeys){
-  const rows=document.getElementById(id).rows;
-  for(let i=1;i<rows.length;i++){
-    const name=rows[i].cells[0].children[0].value;
-    if(!name) continue;
-    let statObj={games:1};
-    statKeys.forEach((k,index)=>{
-      statObj[k]=parseInt(rows[i].cells[index+1].children[0].value);
-    });
-    addPlayer(name, statObj);
-  }
-}
-
-function recordTeam(teamId, winId){
-  const team=document.getElementById(teamId).value;
-  const win=document.getElementById(winId).checked;
-  if(!teams[team]) teams[team]={wins:0,losses:0};
-  if(win) teams[team].wins++;
-  else teams[team].losses++;
-}
-
-function save(){
+function saveData(){
   localStorage.setItem("players",JSON.stringify(players));
   localStorage.setItem("teams",JSON.stringify(teams));
   updateSummary();
@@ -244,41 +269,41 @@ function save(){
 }
 
 function updateSummary(){
-  let html="";
-  for(let name in players){
-    html+=`<b>${name}</b> (${players[name].games} games)<br>`;
-    for(let key in players[name]){
+  var html="";
+  for(var name in players){
+    html+="<b>"+name+"</b> ("+players[name].games+" games)<br>";
+    for(var key in players[name]){
       if(key!=="games"){
-        html+=`${key}: ${(players[name][key]/players[name].games).toFixed(1)} `;
+        html+=key+": "+(players[name][key]/players[name].games).toFixed(1)+" ";
       }
     }
     html+="<br><br>";
   }
   document.getElementById("playerSummary").innerHTML=html;
 
-  let teamHtml="";
-  for(let t in teams){
-    teamHtml+=`${t}: ${teams[t].wins}W - ${teams[t].losses}L<br>`;
+  var teamHtml="";
+  for(var t in teams){
+    teamHtml+=t+": "+teams[t].wins+"W - "+teams[t].losses+"L<br>";
   }
   document.getElementById("teamSummary").innerHTML=teamHtml;
 }
 
 function backupData(){
-  const blob=new Blob([JSON.stringify({players,teams})],{type:"application/json"});
-  const a=document.createElement("a");
+  var blob=new Blob([JSON.stringify({players:players,teams:teams})],{type:"application/json"});
+  var a=document.createElement("a");
   a.href=URL.createObjectURL(blob);
   a.download="backup.json";
   a.click();
 }
 
 function restoreData(e){
-  const file=e.target.files[0];
-  const reader=new FileReader();
+  var file=e.target.files[0];
+  var reader=new FileReader();
   reader.onload=function(){
-    const data=JSON.parse(reader.result);
+    var data=JSON.parse(reader.result);
     players=data.players;
     teams=data.teams;
-    save();
+    saveData();
   };
   reader.readAsText(file);
 }
