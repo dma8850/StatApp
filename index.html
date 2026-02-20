@@ -1,4 +1,3 @@
-
 <!DOCTYPE html>
 <html>
 <head>
@@ -6,92 +5,93 @@
 <title>Sports Stat Tracker</title>
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <style>
-body { font-family: Arial, sans-serif; margin:0; padding:20px; background:#f4f6f8; color:#333; }
-h1 { text-align:center; color:#1e3a8a; margin-bottom:10px; }
+body { font-family: Arial, sans-serif; margin:0; padding:20px; background:#f4f6f8; }
+h1 { text-align:center; margin-bottom:10px; }
 
 .top-controls {
-    display:flex;
-    justify-content:center;
-    gap:10px;
-    margin-bottom:15px;
-    flex-wrap:wrap;
+  display:flex;
+  justify-content:center;
+  gap:10px;
+  margin-bottom:15px;
+  flex-wrap:wrap;
 }
 
 .top-controls button {
-    padding:10px 16px;
-    border:none;
-    border-radius:10px;
-    font-weight:bold;
-    cursor:pointer;
+  padding:10px 16px;
+  border:none;
+  border-radius:10px;
+  font-weight:bold;
+  cursor:pointer;
+  color:white;
 }
 
-.backup-btn { background:#7c3aed; color:white; }
-.restore-btn { background:#f59e0b; color:white; }
+.backup-btn { background:#7c3aed; }
+.restore-btn { background:#f59e0b; }
 
 .tab-buttons {
-    display: grid;
-    grid-template-columns: repeat(auto-fit, minmax(140px, 1fr));
-    gap: 8px;
-    margin-bottom: 20px;
+  display:grid;
+  grid-template-columns: repeat(auto-fit, minmax(140px, 1fr));
+  gap:8px;
+  margin-bottom:20px;
 }
 
 .tab-buttons button {
-    padding:10px 0;
-    border:none;
-    border-radius:12px;
-    background:#1e40af;
-    color:white;
-    font-weight:bold;
-    cursor:pointer;
+  padding:10px;
+  border:none;
+  border-radius:10px;
+  background:#1e40af;
+  color:white;
+  font-weight:bold;
+  cursor:pointer;
 }
 
 .tab-buttons button.active { background:#2563eb; }
-
 #btn-epl-box, #btn-epl-summary { background:#059669; }
 #btn-epl-box.active, #btn-epl-summary.active { background:#10b981; }
 
 .tab { display:none; }
 
 .team-card {
-    background:white;
-    border-radius:12px;
-    padding:15px;
-    margin-bottom:20px;
-    box-shadow:0 2px 6px rgba(0,0,0,0.15);
+  background:white;
+  border-radius:12px;
+  padding:15px;
+  margin-bottom:20px;
+  box-shadow:0 2px 6px rgba(0,0,0,0.15);
 }
 
-#eplBox .team-card, #eplSummary .scroll-box { background:#d1fae5; }
+#eplBox .team-card { background:#d1fae5; }
 
-table { width:100%; border-collapse:collapse; margin-bottom:10px; }
+table { width:100%; border-collapse:collapse; margin-top:10px; }
 th, td { border:1px solid #ccc; padding:6px; text-align:center; }
 
 input[type="text"], select {
-    width:90%;
-    padding:4px;
-    border-radius:6px;
-    border:1px solid #ccc;
-    text-align:center;
+  width:90%;
+  padding:4px;
+  border-radius:6px;
+  border:1px solid #ccc;
+  text-align:center;
 }
 
 button.publish {
-    width:100%;
-    padding:15px;
-    background:#10b981;
-    color:white;
-    font-size:18px;
-    font-weight:bold;
-    border:none;
-    border-radius:12px;
-    cursor:pointer;
+  width:100%;
+  padding:15px;
+  background:#10b981;
+  color:white;
+  font-size:18px;
+  font-weight:bold;
+  border:none;
+  border-radius:12px;
+  cursor:pointer;
+  margin-top:10px;
 }
 
 .scroll-box {
-    max-height:180px;
-    overflow-y:auto;
-    border:1px solid #ccc;
-    padding:10px;
-    border-radius:12px;
-    background:white;
+  max-height:200px;
+  overflow-y:auto;
+  border:1px solid #ccc;
+  padding:10px;
+  border-radius:10px;
+  background:white;
 }
 </style>
 </head>
@@ -100,25 +100,39 @@ button.publish {
 <h1>Sports Stat Tracker</h1>
 
 <div class="top-controls">
-<button class="backup-btn" onclick="backupData()">Backup All Data</button>
-<button class="restore-btn" onclick="document.getElementById('restoreInput').click()">Restore Data</button>
-<input type="file" id="restoreInput" style="display:none" accept=".json" onchange="restoreData(event)">
+  <button class="backup-btn" onclick="backupData()">Backup All Data</button>
+  <button class="restore-btn" onclick="document.getElementById('restoreInput').click()">Restore Data</button>
+  <input type="file" id="restoreInput" style="display:none" accept=".json" onchange="restoreData(event)">
 </div>
 
 <div class="tab-buttons">
-<button id="btn-nba-box" onclick="showTab('nbaBox')">NBA Boxscore</button>
-<button id="btn-nba-summary" onclick="showTab('nbaSummary')">NBA Summary</button>
-<button id="btn-epl-box" onclick="showTab('eplBox')">EPL Match</button>
-<button id="btn-epl-summary" onclick="showTab('eplSummary')">EPL Summary</button>
+  <button id="btn-nba-box" onclick="showTab('nbaBox')">NBA Boxscore</button>
+  <button id="btn-nba-summary" onclick="showTab('nbaSummary')">NBA Summary</button>
+  <button id="btn-epl-box" onclick="showTab('eplBox')">EPL Match</button>
+  <button id="btn-epl-summary" onclick="showTab('eplSummary')">EPL Summary</button>
 </div>
 
-<!-- Tabs remain same as before -->
 <div id="nbaBox" class="tab"></div>
-<div id="nbaSummary" class="tab"><h2>NBA Summary</h2><div id="leaderboardNBA"></div><h3>Team Records</h3><div class="scroll-box" id="teamRecordsNBA"></div></div>
+<div id="nbaSummary" class="tab">
+  <h2>NBA Leaders (Per Game Avg)</h2>
+  <div id="leaderboardNBA"></div>
+  <h3>Team Records</h3>
+  <div class="scroll-box" id="teamRecordsNBA"></div>
+</div>
+
 <div id="eplBox" class="tab"></div>
-<div id="eplSummary" class="tab"><h2>EPL Summary</h2><div id="leaderboardEPL"></div><h3>Team Records</h3><div class="scroll-box" id="teamRecordsEPL"></div></div>
+<div id="eplSummary" class="tab">
+  <h2>EPL Leaders (Per Game Avg)</h2>
+  <div id="leaderboardEPL"></div>
+  <h3>Team Records</h3>
+  <div class="scroll-box" id="teamRecordsEPL"></div>
+</div>
 
 <script>
+
+// TEAM LISTS
+const nbaTeams = ["Lakers","Warriors","Celtics","Bulls","Heat","Nets","Suns","Knicks","Mavericks","Nuggets"];
+const eplTeams = ["Arsenal","Chelsea","Liverpool","Man City","Man United","Tottenham","Newcastle","West Ham","Brighton","Everton"];
 
 // STORAGE
 let playersDataNBA = JSON.parse(localStorage.getItem("playersDataNBA"))||{};
@@ -128,61 +142,184 @@ let playersDataEPL = JSON.parse(localStorage.getItem("playersDataEPL"))||{};
 let teamRecordsEPL = JSON.parse(localStorage.getItem("teamRecordsEPL"))||{};
 let lastRosterEPL = JSON.parse(localStorage.getItem("lastRosterEPL"))||{};
 
-// BACKUP FUNCTION
+// INIT
+init();
+
+function init(){
+  buildNBA();
+  buildEPL();
+  updateSummaryNBA();
+  updateSummaryEPL();
+  showTab("nbaBox");
+}
+
+// BUILD NBA
+function buildNBA(){
+  document.getElementById("nbaBox").innerHTML = buildLeagueUI("NBA", nbaTeams, 10, ["PTS","REB","AST","STL","BLK"]);
+}
+
+// BUILD EPL
+function buildEPL(){
+  document.getElementById("eplBox").innerHTML = buildLeagueUI("EPL", eplTeams, 11, ["Goals","Assists"]);
+}
+
+function buildLeagueUI(league, teams, playerCount, stats){
+  return `
+    ${buildTeamCard(league,"1",teams,playerCount,stats)}
+    ${buildTeamCard(league,"2",teams,playerCount,stats)}
+    <button class="publish" onclick="publishGame('${league}',${playerCount},${JSON.stringify(stats).replace(/"/g,'&quot;')})">
+      Publish ${league}
+    </button>
+  `;
+}
+
+function buildTeamCard(league, num, teams, playerCount, stats){
+  return `
+    <div class="team-card">
+      <select id="${league}Team${num}" onchange="prefillRoster('${league}', this.value, ${playerCount})">
+        <option value="">Select Team</option>
+        ${teams.map(t=>`<option value="${t}">${t}</option>`).join("")}
+      </select>
+      <input type="checkbox" id="${league}Team${num}Win"> Winner
+      ${buildTable(league,num,playerCount,stats)}
+    </div>
+  `;
+}
+
+function buildTable(league,num,count,stats){
+  let rows="";
+  for(let i=0;i<count;i++){
+    rows+=`<tr>
+      <td><input type="text" id="${league}Name${num}_${i}"></td>
+      ${stats.map(stat=>`<td>${statDropdown(stat)}</td>`).join("")}
+    </tr>`;
+  }
+  return `<table>
+    <tr><th>Name</th>${stats.map(s=>`<th>${s}</th>`).join("")}</tr>
+    ${rows}
+  </table>`;
+}
+
+function statDropdown(stat){
+  let max = (stat==="Goals"||stat==="Assists")?10:100;
+  let opts="";
+  for(let i=0;i<=max;i++) opts+=`<option value="${i}">${i}</option>`;
+  return `<select>${opts}</select>`;
+}
+
+// PREFILL
+function prefillRoster(league, team, count){
+  if(!team) return;
+  let roster = (league==="NBA"?lastRosterNBA:lastRosterEPL)[team];
+  if(!roster) return;
+  for(let i=0;i<count;i++){
+    let input=document.getElementById(`${league}Name1_${i}`)||
+              document.getElementById(`${league}Name2_${i}`);
+    if(input && roster[i]) input.value=roster[i];
+  }
+}
+
+// PUBLISH
+function publishGame(league,count,stats){
+  for(let t=1;t<=2;t++){
+    let team=document.getElementById(`${league}Team${t}`).value;
+    if(!team) continue;
+    let win=document.getElementById(`${league}Team${t}Win`).checked;
+    let data = league==="NBA"?playersDataNBA:playersDataEPL;
+    let records = league==="NBA"?teamRecordsNBA:teamRecordsEPL;
+    let rosterStore = league==="NBA"?lastRosterNBA:lastRosterEPL;
+
+    if(!records[team]) records[team]={wins:0,losses:0};
+    win?records[team].wins++:records[team].losses++;
+
+    rosterStore[team]=[];
+
+    for(let i=0;i<count;i++){
+      let name=document.getElementById(`${league}Name${t}_${i}`).value;
+      rosterStore[team][i]=name;
+      if(!name) continue;
+
+      let selects=document.querySelectorAll(`#${league}Name${t}_${i} ~ select`);
+      if(!data[name]) data[name]={games:0};
+      stats.forEach((stat,idx)=>{
+        if(!data[name][stat]) data[name][stat]=0;
+        data[name][stat]+=parseInt(selects[idx].value);
+      });
+      data[name].games++;
+    }
+  }
+
+  saveAll();
+  updateSummaryNBA();
+  updateSummaryEPL();
+  alert("Game Published!");
+}
+
+function saveAll(){
+  localStorage.setItem("playersDataNBA",JSON.stringify(playersDataNBA));
+  localStorage.setItem("teamRecordsNBA",JSON.stringify(teamRecordsNBA));
+  localStorage.setItem("lastRosterNBA",JSON.stringify(lastRosterNBA));
+  localStorage.setItem("playersDataEPL",JSON.stringify(playersDataEPL));
+  localStorage.setItem("teamRecordsEPL",JSON.stringify(teamRecordsEPL));
+  localStorage.setItem("lastRosterEPL",JSON.stringify(lastRosterEPL));
+}
+
+// SUMMARIES
+function updateSummaryNBA(){ updateSummary("NBA",playersDataNBA,teamRecordsNBA,["PTS","REB","AST","STL","BLK"]); }
+function updateSummaryEPL(){ updateSummary("EPL",playersDataEPL,teamRecordsEPL,["Goals","Assists"]); }
+
+function updateSummary(league,data,records,stats){
+  let board="";
+  stats.forEach(stat=>{
+    let leader=null;
+    for(let p in data){
+      let avg=data[p][stat]/data[p].games;
+      if(!leader||avg>leader.val) leader={name:p,val:avg};
+    }
+    if(leader) board+=`<p>${stat}: ${leader.name} (${leader.val.toFixed(1)})</p>`;
+  });
+  document.getElementById(`leaderboard${league}`).innerHTML=board;
+
+  let rec="";
+  for(let t in records)
+    rec+=`<p>${t}: ${records[t].wins}W - ${records[t].losses}L</p>`;
+  document.getElementById(`teamRecords${league}`).innerHTML=rec;
+}
+
+// BACKUP
 function backupData(){
-    const backup = {
-        playersDataNBA,
-        teamRecordsNBA,
-        lastRosterNBA,
-        playersDataEPL,
-        teamRecordsEPL,
-        lastRosterEPL
-    };
-
-    const blob = new Blob([JSON.stringify(backup, null, 2)], {type:"application/json"});
-    const link = document.createElement("a");
-    link.href = URL.createObjectURL(blob);
-    link.download = "sports_stat_backup.json";
-    link.click();
+  const backup={playersDataNBA,teamRecordsNBA,lastRosterNBA,playersDataEPL,teamRecordsEPL,lastRosterEPL};
+  const blob=new Blob([JSON.stringify(backup,null,2)],{type:"application/json"});
+  const link=document.createElement("a");
+  link.href=URL.createObjectURL(blob);
+  link.download="sports_stat_backup.json";
+  link.click();
 }
 
-// RESTORE FUNCTION
-function restoreData(event){
-    const file = event.target.files[0];
-    if(!file) return;
-
-    const reader = new FileReader();
-    reader.onload = function(e){
-        const data = JSON.parse(e.target.result);
-
-        playersDataNBA = data.playersDataNBA || {};
-        teamRecordsNBA = data.teamRecordsNBA || {};
-        lastRosterNBA = data.lastRosterNBA || {};
-        playersDataEPL = data.playersDataEPL || {};
-        teamRecordsEPL = data.teamRecordsEPL || {};
-        lastRosterEPL = data.lastRosterEPL || {};
-
-        localStorage.setItem("playersDataNBA", JSON.stringify(playersDataNBA));
-        localStorage.setItem("teamRecordsNBA", JSON.stringify(teamRecordsNBA));
-        localStorage.setItem("lastRosterNBA", JSON.stringify(lastRosterNBA));
-        localStorage.setItem("playersDataEPL", JSON.stringify(playersDataEPL));
-        localStorage.setItem("teamRecordsEPL", JSON.stringify(teamRecordsEPL));
-        localStorage.setItem("lastRosterEPL", JSON.stringify(lastRosterEPL));
-
-        alert("Data Restored Successfully!");
-        updateSummaryNBA();
-        updateSummaryEPL();
-    };
-    reader.readAsText(file);
+// RESTORE
+function restoreData(e){
+  const file=e.target.files[0];
+  const reader=new FileReader();
+  reader.onload=function(evt){
+    const data=JSON.parse(evt.target.result);
+    playersDataNBA=data.playersDataNBA||{};
+    teamRecordsNBA=data.teamRecordsNBA||{};
+    lastRosterNBA=data.lastRosterNBA||{};
+    playersDataEPL=data.playersDataEPL||{};
+    teamRecordsEPL=data.teamRecordsEPL||{};
+    lastRosterEPL=data.lastRosterEPL||{};
+    saveAll();
+    updateSummaryNBA();
+    updateSummaryEPL();
+    alert("Data Restored!");
+  };
+  reader.readAsText(file);
 }
 
-// Minimal tab switching for this example
 function showTab(id){
-    document.querySelectorAll(".tab").forEach(t=>t.style.display="none");
-    document.getElementById(id).style.display="block";
+  document.querySelectorAll(".tab").forEach(t=>t.style.display="none");
+  document.getElementById(id).style.display="block";
 }
-
-showTab("nbaBox");
 
 </script>
 
