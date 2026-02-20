@@ -76,7 +76,7 @@ th, td {
     border-radius: 6px;
 }
 
-input[type="text"], input[type="number"], select {
+input[type="text"], select {
     width: 80%;
     padding: 5px;
     border-radius: 6px;
@@ -201,18 +201,29 @@ function populateTeams(){
 function createPlayerTable(containerId){
   let container = document.getElementById(containerId);
   let table = "<table><tr><th>Name</th><th>PTS</th><th>REB</th><th>AST</th><th>STL</th><th>BLK</th></tr>";
+  
   for(let i=0;i<10;i++){
     table += `<tr>
       <td><input type="text" class="name"></td>
-      <td><input type="number" class="pts"></td>
-      <td><input type="number" class="reb"></td>
-      <td><input type="number" class="ast"></td>
-      <td><input type="number" class="stl"></td>
-      <td><input type="number" class="blk"></td>
+      <td>${createStatDropdown()}</td>
+      <td>${createStatDropdown()}</td>
+      <td>${createStatDropdown()}</td>
+      <td>${createStatDropdown()}</td>
+      <td>${createStatDropdown()}</td>
     </tr>`;
   }
+  
   table += "</table>";
   container.innerHTML = table;
+}
+
+function createStatDropdown(){
+  let select = '<select class="stat">';
+  for(let i=0;i<=100;i++){
+    select += `<option value="${i}">${i}</option>`;
+  }
+  select += '</select>';
+  return select;
 }
 
 function publishGame(){
@@ -233,12 +244,13 @@ function processTeam(teamName, won, container){
     let name = row.querySelector(".name").value;
     if(!name) return;
 
+    let statElems = row.querySelectorAll(".stat");
     let stats = {
-      pts: +row.querySelector(".pts").value || 0,
-      reb: +row.querySelector(".reb").value || 0,
-      ast: +row.querySelector(".ast").value || 0,
-      stl: +row.querySelector(".stl").value || 0,
-      blk: +row.querySelector(".blk").value || 0
+      pts: +statElems[0].value,
+      reb: +statElems[1].value,
+      ast: +statElems[2].value,
+      stl: +statElems[3].value,
+      blk: +statElems[4].value
     };
 
     if(!playersData[name]){
