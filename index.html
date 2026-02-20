@@ -97,11 +97,17 @@ select { width:100%; }
 
 <!-- SUMMARY -->
 <div id="summary" class="section">
-<h2>Player Averages</h2>
-<div class="summary-box" id="playerSummary"></div>
+<h2>NBA Player Averages</h2>
+<div class="summary-box" id="nbaPlayerSummary"></div>
 
-<h2>Team Records</h2>
-<div class="summary-box" id="teamSummary"></div>
+<h2>NBA Team Records</h2>
+<div class="summary-box" id="nbaTeamSummary"></div>
+
+<h2>EPL Player Averages</h2>
+<div class="summary-box" id="eplPlayerSummary"></div>
+
+<h2>EPL Team Records</h2>
+<div class="summary-box" id="eplTeamSummary"></div>
 
 <button class="publish-btn" onclick="backupData()">Backup Data</button>
 <input type="file" onchange="restoreData(event)">
@@ -109,6 +115,7 @@ select { width:100%; }
 
 <script>
 
+// Team lists
 var nbaTeams = [
 "Atlanta Hawks","Boston Celtics","Brooklyn Nets","Charlotte Hornets",
 "Chicago Bulls","Cleveland Cavaliers","Dallas Mavericks","Denver Nuggets",
@@ -128,196 +135,179 @@ var eplTeams = [
 "Nottingham Forest","Sheffield United","Tottenham","West Ham","Wolves"
 ];
 
-var players = JSON.parse(localStorage.getItem("players") || "{}");
-var teams = JSON.parse(localStorage.getItem("teams") || "{}");
+// Data storage
+var nbaPlayers = JSON.parse(localStorage.getItem("nbaPlayers") || "{}");
+var nbaTeamRecords = JSON.parse(localStorage.getItem("nbaTeams") || "{}");
 
+var eplPlayers = JSON.parse(localStorage.getItem("eplPlayers") || "{}");
+var eplTeamRecords = JSON.parse(localStorage.getItem("eplTeams") || "{}");
+
+// Tab switching
 function showTab(id){
   var sections = document.getElementsByClassName("section");
-  for(var i=0;i<sections.length;i++){
-    sections[i].classList.remove("active");
-  }
+  for(var i=0;i<sections.length;i++){ sections[i].classList.remove("active"); }
   document.getElementById(id).classList.add("active");
 
   document.getElementById("btnNBA").classList.remove("active");
   document.getElementById("btnEPL").classList.remove("active");
   document.getElementById("btnSummary").classList.remove("active");
-
   if(id==="nba") document.getElementById("btnNBA").classList.add("active");
   if(id==="epl") document.getElementById("btnEPL").classList.add("active");
   if(id==="summary") document.getElementById("btnSummary").classList.add("active");
 }
 
+// Fill dropdowns
 function fillSelect(id,list){
   var sel=document.getElementById(id);
   for(var i=0;i<list.length;i++){
     var opt=document.createElement("option");
-    opt.value=list[i];
-    opt.text=list[i];
+    opt.value=list[i]; opt.text=list[i];
     sel.appendChild(opt);
   }
 }
 
+// Create 0-100 dropdown
 function makeDropdown(){
   var select=document.createElement("select");
   for(var i=0;i<=100;i++){
-    var opt=document.createElement("option");
-    opt.value=i;
-    opt.text=i;
-    select.appendChild(opt);
+    var opt=document.createElement("option"); opt.value=i; opt.text=i; select.appendChild(opt);
   }
   return select;
 }
 
+// Build NBA table
 function buildNBATable(id){
   var table=document.getElementById(id);
   table.innerHTML="<tr><th>Name</th><th>PTS</th><th>REB</th><th>AST</th><th>STL</th><th>BLK</th></tr>";
   for(var i=0;i<10;i++){
     var row=document.createElement("tr");
-    var cell=document.createElement("td");
-    var input=document.createElement("input");
-    cell.appendChild(input);
-    row.appendChild(cell);
-    for(var j=0;j<5;j++){
-      var statCell=document.createElement("td");
-      statCell.appendChild(makeDropdown());
-      row.appendChild(statCell);
-    }
+    var nameCell=document.createElement("td"); nameCell.appendChild(document.createElement("input"));
+    row.appendChild(nameCell);
+    for(var j=0;j<5;j++){ var cell=document.createElement("td"); cell.appendChild(makeDropdown()); row.appendChild(cell); }
     table.appendChild(row);
   }
 }
 
+// Build EPL table
 function buildEPLTable(id){
   var table=document.getElementById(id);
   table.innerHTML="<tr><th>Name</th><th>Goals</th><th>Assists</th></tr>";
   for(var i=0;i<11;i++){
     var row=document.createElement("tr");
-    var cell=document.createElement("td");
-    var input=document.createElement("input");
-    cell.appendChild(input);
-    row.appendChild(cell);
-    for(var j=0;j<2;j++){
-      var statCell=document.createElement("td");
-      statCell.appendChild(makeDropdown());
-      row.appendChild(statCell);
-    }
+    var nameCell=document.createElement("td"); nameCell.appendChild(document.createElement("input"));
+    row.appendChild(nameCell);
+    for(var j=0;j<2;j++){ var cell=document.createElement("td"); cell.appendChild(makeDropdown()); row.appendChild(cell); }
     table.appendChild(row);
   }
 }
 
-function addPlayer(name,stats){
+// Add player
+function addPlayer(name,stats,store){
   if(!name) return;
-
-  if(!players[name]){
-    players[name]={games:0};
-  }
-
-  players[name].games++;
-
-  for(var key in stats){
-    if(!players[name][key]) players[name][key]=0;
-    players[name][key]+=stats[key];
-  }
+  if(!store[name]){ store[name]={games:0}; }
+  store[name].games++;
+  for(var key in stats){ if(!store[name][key]) store[name][key]=0; store[name][key]+=stats[key]; }
 }
 
-function processTable(id,statKeys){
+// Process table
+function processTable(id,statKeys,store){
   var rows=document.getElementById(id).rows;
   for(var i=1;i<rows.length;i++){
     var name=rows[i].cells[0].children[0].value;
     if(!name) continue;
-
     var statObj={};
-    for(var j=0;j<statKeys.length;j++){
-      statObj[statKeys[j]]=parseInt(rows[i].cells[j+1].children[0].value);
-    }
-    addPlayer(name,statObj);
+    for(var j=0;j<statKeys.length;j++){ statObj[statKeys[j]]=parseInt(rows[i].cells[j+1].children[0].value); }
+    addPlayer(name,statObj,store);
   }
 }
 
-function recordTeam(teamId,winId){
+// Record team
+function recordTeam(teamId,winId,store){
   var team=document.getElementById(teamId).value;
   var win=document.getElementById(winId).checked;
-
-  if(!teams[team]){
-    teams[team]={wins:0,losses:0};
-  }
-
-  if(win) teams[team].wins++;
-  else teams[team].losses++;
+  if(!store[team]) store[team]={wins:0,losses:0};
+  if(win) store[team].wins++;
+  else store[team].losses++;
 }
 
-function publishNBA(){
-  processTable("nbaTable1",["pts","reb","ast","stl","blk"]);
-  processTable("nbaTable2",["pts","reb","ast","stl","blk"]);
-  recordTeam("nbaTeam1","nbaWin1");
-  recordTeam("nbaTeam2","nbaWin2");
-  saveData();
-}
+// Publish functions
+function publishNBA(){ processTable("nbaTable1",["pts","reb","ast","stl","blk"],nbaPlayers);
+                       processTable("nbaTable2",["pts","reb","ast","stl","blk"],nbaPlayers);
+                       recordTeam("nbaTeam1","nbaWin1",nbaTeamRecords);
+                       recordTeam("nbaTeam2","nbaWin2",nbaTeamRecords);
+                       saveData(); }
 
-function publishEPL(){
-  processTable("eplTable1",["goals","assists"]);
-  processTable("eplTable2",["goals","assists"]);
-  recordTeam("eplTeam1","eplWin1");
-  recordTeam("eplTeam2","eplWin2");
-  saveData();
-}
+function publishEPL(){ processTable("eplTable1",["goals","assists"],eplPlayers);
+                       processTable("eplTable2",["goals","assists"],eplPlayers);
+                       recordTeam("eplTeam1","eplWin1",eplTeamRecords);
+                       recordTeam("eplTeam2","eplWin2",eplTeamRecords);
+                       saveData(); }
 
+// Save to localStorage and update summaries
 function saveData(){
-  localStorage.setItem("players",JSON.stringify(players));
-  localStorage.setItem("teams",JSON.stringify(teams));
+  localStorage.setItem("nbaPlayers",JSON.stringify(nbaPlayers));
+  localStorage.setItem("nbaTeams",JSON.stringify(nbaTeamRecords));
+  localStorage.setItem("eplPlayers",JSON.stringify(eplPlayers));
+  localStorage.setItem("eplTeams",JSON.stringify(eplTeamRecords));
   updateSummary();
   alert("Published!");
 }
 
+// Update both summaries
 function updateSummary(){
-  var html="";
-  for(var name in players){
-    html+="<b>"+name+"</b> ("+players[name].games+" games)<br>";
-    for(var key in players[name]){
-      if(key!=="games"){
-        html+=key+": "+(players[name][key]/players[name].games).toFixed(1)+" ";
-      }
-    }
+  var html="", tHtml="";
+
+  // NBA Player
+  html="";
+  for(var name in nbaPlayers){
+    html+="<b>"+name+"</b> ("+nbaPlayers[name].games+" games)<br>";
+    for(var key in nbaPlayers[name]){ if(key!=="games") html+=key+": "+(nbaPlayers[name][key]/nbaPlayers[name].games).toFixed(1)+" "; }
     html+="<br><br>";
   }
-  document.getElementById("playerSummary").innerHTML=html;
+  document.getElementById("nbaPlayerSummary").innerHTML=html;
 
-  var teamHtml="";
-  for(var t in teams){
-    teamHtml+=t+": "+teams[t].wins+"W - "+teams[t].losses+"L<br>";
+  // NBA Teams
+  tHtml="";
+  for(var t in nbaTeamRecords){ tHtml+=t+": "+nbaTeamRecords[t].wins+"W - "+nbaTeamRecords[t].losses+"L<br>"; }
+  document.getElementById("nbaTeamSummary").innerHTML=tHtml;
+
+  // EPL Player
+  html="";
+  for(var name in eplPlayers){
+    html+="<b>"+name+"</b> ("+eplPlayers[name].games+" games)<br>";
+    for(var key in eplPlayers[name]){ if(key!=="games") html+=key+": "+(eplPlayers[name][key]/eplPlayers[name].games).toFixed(1)+" "; }
+    html+="<br><br>";
   }
-  document.getElementById("teamSummary").innerHTML=teamHtml;
+  document.getElementById("eplPlayerSummary").innerHTML=html;
+
+  // EPL Teams
+  tHtml="";
+  for(var t in eplTeamRecords){ tHtml+=t+": "+eplTeamRecords[t].wins+"W - "+eplTeamRecords[t].losses+"L<br>"; }
+  document.getElementById("eplTeamSummary").innerHTML=tHtml;
 }
 
+// Backup + Restore
 function backupData(){
-  var blob=new Blob([JSON.stringify({players:players,teams:teams})],{type:"application/json"});
-  var a=document.createElement("a");
-  a.href=URL.createObjectURL(blob);
-  a.download="backup.json";
-  a.click();
+  var blob=new Blob([JSON.stringify({nbaPlayers:nbaPlayers,nbaTeams:nbaTeamRecords,eplPlayers:eplPlayers,eplTeams:eplTeamRecords})],{type:"application/json"});
+  var a=document.createElement("a"); a.href=URL.createObjectURL(blob); a.download="backup.json"; a.click();
 }
 
 function restoreData(e){
-  var file=e.target.files[0];
-  var reader=new FileReader();
-  reader.onload=function(){
+  var file=e.target.files[0]; var reader=new FileReader();
+  reader.onload=function(){ 
     var data=JSON.parse(reader.result);
-    players=data.players;
-    teams=data.teams;
+    nbaPlayers=data.nbaPlayers; nbaTeamRecords=data.nbaTeams;
+    eplPlayers=data.eplPlayers; eplTeamRecords=data.eplTeams;
     saveData();
   };
   reader.readAsText(file);
 }
 
-fillSelect("nbaTeam1",nbaTeams);
-fillSelect("nbaTeam2",nbaTeams);
-fillSelect("eplTeam1",eplTeams);
-fillSelect("eplTeam2",eplTeams);
-
-buildNBATable("nbaTable1");
-buildNBATable("nbaTable2");
-buildEPLTable("eplTable1");
-buildEPLTable("eplTable2");
-
+// Initialize
+fillSelect("nbaTeam1",nbaTeams); fillSelect("nbaTeam2",nbaTeams);
+fillSelect("eplTeam1",eplTeams); fillSelect("eplTeam2",eplTeams);
+buildNBATable("nbaTable1"); buildNBATable("nbaTable2");
+buildEPLTable("eplTable1"); buildEPLTable("eplTable2");
 updateSummary();
 
 </script>
