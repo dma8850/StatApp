@@ -1,0 +1,174 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="UTF-8">
+<title>Basketball Stat Tracker</title>
+<style>
+body { font-family: Arial; margin: 20px; }
+.tab { display: none; }
+.tab-buttons button { margin-right: 10px; }
+input { width: 50px; }
+table { border-collapse: collapse; margin-bottom: 20px; }
+td, th { border: 1px solid #ccc; padding: 4px; text-align: center; }
+.scroll-box { max-height: 150px; overflow-y: auto; border: 1px solid #ccc; padding: 5px; }
+</style>
+</head>
+<body>
+
+<h1>Basketball Stat Tracker</h1>
+
+<div class="tab-buttons">
+<button onclick="showTab('boxscore')">Boxscore</button>
+<button onclick="showTab('summary')">Summary</button>
+</div>
+
+<div id="boxscore" class="tab">
+<h2>Boxscore</h2>
+
+<select id="team1"></select>
+<input type="checkbox" id="team1win"> Winner
+
+<select id="team2"></select>
+<input type="checkbox" id="team2win"> Winner
+
+<h3>Team 1 Players</h3>
+<div id="team1players"></div>
+
+<h3>Team 2 Players</h3>
+<div id="team2players"></div>
+
+<button onclick="publishGame()">Publish</button>
+</div>
+
+<div id="summary" class="tab">
+<h2>Summary</h2>
+<div id="leaderboard"></div>
+
+<h3>Team Records</h3>
+<div class="scroll-box" id="teamRecords"></div>
+</div>
+
+<script>
+const nbaTeams = ["Hawks","Celtics","Nets","Hornets","Bulls","Cavaliers","Mavericks","Nuggets",
+"Pistons","Warriors","Rockets","Pacers","Clippers","Lakers","Grizzlies","Heat",
+"Bucks","Timberwolves","Pelicans","Knicks","Thunder","Magic","76ers","Suns",
+"Trail Blazers","Kings","Spurs","Raptors","Jazz","Wizards"];
+
+let playersData = JSON.parse(localStorage.getItem("playersData")) || {};
+let teamRecords = JSON.parse(localStorage.getItem("teamRecords")) || {};
+
+function showTab(id){
+document.querySelectorAll(".tab").forEach(t=>t.style.display="none");
+document.getElementById(id).style.display="block";
+updateSummary();
+}
+
+function populateTeams(){
+nbaTeams.forEach(team=>{
+let opt1 = new Option(team, team);
+let opt2 = new Option(team, team);
+team1.add(opt1);
+team2.add(opt2);
+});
+}
+
+function createPlayerTable(containerId){
+let container = document.getElementById(containerId);
+let table = "<table><tr><th>Name</th><th>PTS</th><th>REB</th><th>AST</th><th>STL</th><th>BLK</th></tr>";
+for(let i=0;i<10;i++){
+table += `<tr>
+<td><input type="text" class="name"></td>
+<td><input type="number" class="pts"></td>
+<td><input type="number" class="reb"></td>
+<td><input type="number" class="ast"></td>
+<td><input type="number" class="stl"></td>
+<td><input type="number" class="blk"></td>
+</tr>`;
+}
+table += "</table>";
+container.innerHTML = table;
+}
+
+function publishGame(){
+processTeam(team1.value, team1win.checked, document.querySelector("#team1players"));
+processTeam(team2.value, team2win.checked, document.querySelector("#team2players"));
+localStorage.setItem("playersData", JSON.stringify(playersData));
+localStorage.setItem("teamRecords", JSON.stringify(teamRecords));
+alert("Game Published!");
+}
+
+function processTeam(teamName, won, container){
+if(!teamRecords[teamName]) teamRecords[teamName]={wins:0, losses:0};
+won ? teamRecords[teamName].wins++ : teamRecords[teamName].losses++;
+
+let rows = container.querySelectorAll("tr");
+rows.forEach((row,i)=>{
+if(i===0) return;
+let name = row.querySelector(".name").value;
+if(!name) return;
+
+let stats = {
+pts: +row.querySelector(".pts").value || 0,
+reb: +row.querySelector(".reb").value || 0,
+ast: +row.querySelector(".ast").value || 0,
+stl: +row.querySelector(".stl").value || 0,
+blk: +row.querySelector(".blk").value || 0
+};
+
+if(!playersData[name]){
+playersData[name]={games:0, pts:0, reb:0, ast:0, stl:0, blk:0};
+}
+
+playersData[name].games++;
+playersData[name].pts += stats.pts;
+playersData[name].reb += stats.reb;
+playersData[name].ast += stats.ast;
+playersData[name].stl += stats.stl;
+playersData[name].blk += stats.blk;
+});
+}
+
+function updateSummary(){
+let html = "<h3>Leaders (Per Game Averages)</h3>";
+let leaders = {pts:null, reb:null, ast:null, stl:null, blk:null};
+
+for(let name in playersData){
+let p = playersData[name];
+let avg = {
+pts: p.pts/p.games,
+reb: p.reb/p.games,
+ast: p.ast/p.games,
+stl: p.stl/p.games,
+blk: p.blk/p.games
+};
+
+for(let stat in leaders){
+if(!leaders[stat] || avg[stat] > leaders[stat].value){
+leaders[stat]={name:name,value:avg[stat]};
+}
+}
+}
+
+for(let stat in leaders){
+if(leaders[stat]){
+html += `<p>${stat.toUpperCase()}: ${leaders[stat].name} (${leaders[stat].value.toFixed(1)})</p>`;
+}
+}
+
+document.getElementById("leaderboard").innerHTML = html;
+
+let recordsHTML="";
+for(let team in teamRecords){
+recordsHTML += `<p>${team}: ${teamRecords[team].wins}W - ${teamRecords[team].losses}L</p>`;
+}
+document.getElementById("teamRecords").innerHTML = recordsHTML;
+}
+
+populateTeams();
+createPlayerTable("team1players");
+createPlayerTable("team2players");
+showTab("boxscore");
+</script>
+
+</body>
+</html>
