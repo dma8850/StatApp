@@ -3,14 +3,133 @@
 <head>
 <meta charset="UTF-8">
 <title>Basketball Stat Tracker</title>
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
 <style>
-body { font-family: Arial; margin: 20px; }
-.tab { display: none; }
-.tab-buttons button { margin-right: 10px; }
-input { width: 50px; }
-table { border-collapse: collapse; margin-bottom: 20px; }
-td, th { border: 1px solid #ccc; padding: 4px; text-align: center; }
-.scroll-box { max-height: 150px; overflow-y: auto; border: 1px solid #ccc; padding: 5px; }
+/* --- General Styles --- */
+body {
+    font-family: "Arial Rounded MT Bold", Arial, sans-serif;
+    margin: 0;
+    padding: 20px;
+    background-color: #f4f6f8;
+    color: #333;
+}
+
+h1 {
+    text-align: center;
+    color: #1e3a8a;
+    margin-bottom: 20px;
+}
+
+/* --- Tabs --- */
+.tab-buttons {
+    display: flex;
+    justify-content: center;
+    margin-bottom: 20px;
+}
+
+.tab-buttons button {
+    padding: 10px 20px;
+    margin: 0 5px;
+    border: none;
+    border-radius: 12px;
+    background-color: #1e40af;
+    color: white;
+    font-weight: bold;
+    cursor: pointer;
+    transition: background 0.3s;
+}
+
+.tab-buttons button.active {
+    background-color: #2563eb;
+}
+
+/* --- Tab Content --- */
+.tab {
+    display: none;
+}
+
+/* --- Team Cards --- */
+.team-card {
+    background-color: white;
+    border-radius: 12px;
+    padding: 15px;
+    margin-bottom: 20px;
+    box-shadow: 0 2px 6px rgba(0,0,0,0.15);
+}
+
+.team-card h3 {
+    margin-top: 0;
+    color: #1e3a8a;
+}
+
+/* --- Input Table --- */
+table {
+    width: 100%;
+    border-collapse: collapse;
+    margin-bottom: 10px;
+}
+
+th, td {
+    border: 1px solid #ccc;
+    padding: 8px;
+    text-align: center;
+    border-radius: 6px;
+}
+
+input[type="text"], input[type="number"], select {
+    width: 80%;
+    padding: 5px;
+    border-radius: 6px;
+    border: 1px solid #ccc;
+    text-align: center;
+}
+
+input[type="checkbox"] {
+    transform: scale(1.2);
+}
+
+/* --- Publish Button --- */
+button#publish {
+    width: 100%;
+    padding: 15px;
+    background-color: #10b981;
+    color: white;
+    font-size: 18px;
+    font-weight: bold;
+    border: none;
+    border-radius: 12px;
+    cursor: pointer;
+    margin-top: 10px;
+}
+
+button#publish:hover {
+    background-color: #059669;
+}
+
+/* --- Summary Leaderboard --- */
+#leaderboard p {
+    background-color: #e0f2fe;
+    padding: 8px;
+    border-radius: 8px;
+    margin: 5px 0;
+    font-weight: bold;
+}
+
+/* --- Team Records Scroll Box --- */
+.scroll-box {
+    max-height: 180px;
+    overflow-y: auto;
+    border: 1px solid #ccc;
+    padding: 10px;
+    border-radius: 12px;
+    background-color: white;
+}
+
+.scroll-box p:nth-child(odd) {
+    background-color: #f0f9ff;
+    padding: 5px;
+    border-radius: 6px;
+}
 </style>
 </head>
 <body>
@@ -18,28 +137,31 @@ td, th { border: 1px solid #ccc; padding: 4px; text-align: center; }
 <h1>Basketball Stat Tracker</h1>
 
 <div class="tab-buttons">
-<button onclick="showTab('boxscore')">Boxscore</button>
-<button onclick="showTab('summary')">Summary</button>
+<button id="btn-boxscore" onclick="showTab('boxscore')">Boxscore</button>
+<button id="btn-summary" onclick="showTab('summary')">Summary</button>
 </div>
 
+<!-- BOXCORE TAB -->
 <div id="boxscore" class="tab">
-<h2>Boxscore</h2>
 
+<div class="team-card">
 <select id="team1"></select>
 <input type="checkbox" id="team1win"> Winner
-
-<select id="team2"></select>
-<input type="checkbox" id="team2win"> Winner
-
 <h3>Team 1 Players</h3>
 <div id="team1players"></div>
-
-<h3>Team 2 Players</h3>
-<div id="team2players"></div>
-
-<button onclick="publishGame()">Publish</button>
 </div>
 
+<div class="team-card">
+<select id="team2"></select>
+<input type="checkbox" id="team2win"> Winner
+<h3>Team 2 Players</h3>
+<div id="team2players"></div>
+</div>
+
+<button id="publish" onclick="publishGame()">Publish</button>
+</div>
+
+<!-- SUMMARY TAB -->
 <div id="summary" class="tab">
 <h2>Summary</h2>
 <div id="leaderboard"></div>
@@ -58,110 +180,114 @@ let playersData = JSON.parse(localStorage.getItem("playersData")) || {};
 let teamRecords = JSON.parse(localStorage.getItem("teamRecords")) || {};
 
 function showTab(id){
-document.querySelectorAll(".tab").forEach(t=>t.style.display="none");
-document.getElementById(id).style.display="block";
-updateSummary();
+  document.querySelectorAll(".tab").forEach(t=>t.style.display="none");
+  document.getElementById(id).style.display="block";
+  document.getElementById("btn-boxscore").classList.remove("active");
+  document.getElementById("btn-summary").classList.remove("active");
+  if(id==="boxscore") document.getElementById("btn-boxscore").classList.add("active");
+  else document.getElementById("btn-summary").classList.add("active");
+  updateSummary();
 }
 
 function populateTeams(){
-nbaTeams.forEach(team=>{
-let opt1 = new Option(team, team);
-let opt2 = new Option(team, team);
-team1.add(opt1);
-team2.add(opt2);
-});
+  nbaTeams.forEach(team=>{
+    let opt1 = new Option(team, team);
+    let opt2 = new Option(team, team);
+    team1.add(opt1);
+    team2.add(opt2);
+  });
 }
 
 function createPlayerTable(containerId){
-let container = document.getElementById(containerId);
-let table = "<table><tr><th>Name</th><th>PTS</th><th>REB</th><th>AST</th><th>STL</th><th>BLK</th></tr>";
-for(let i=0;i<10;i++){
-table += `<tr>
-<td><input type="text" class="name"></td>
-<td><input type="number" class="pts"></td>
-<td><input type="number" class="reb"></td>
-<td><input type="number" class="ast"></td>
-<td><input type="number" class="stl"></td>
-<td><input type="number" class="blk"></td>
-</tr>`;
-}
-table += "</table>";
-container.innerHTML = table;
+  let container = document.getElementById(containerId);
+  let table = "<table><tr><th>Name</th><th>PTS</th><th>REB</th><th>AST</th><th>STL</th><th>BLK</th></tr>";
+  for(let i=0;i<10;i++){
+    table += `<tr>
+      <td><input type="text" class="name"></td>
+      <td><input type="number" class="pts"></td>
+      <td><input type="number" class="reb"></td>
+      <td><input type="number" class="ast"></td>
+      <td><input type="number" class="stl"></td>
+      <td><input type="number" class="blk"></td>
+    </tr>`;
+  }
+  table += "</table>";
+  container.innerHTML = table;
 }
 
 function publishGame(){
-processTeam(team1.value, team1win.checked, document.querySelector("#team1players"));
-processTeam(team2.value, team2win.checked, document.querySelector("#team2players"));
-localStorage.setItem("playersData", JSON.stringify(playersData));
-localStorage.setItem("teamRecords", JSON.stringify(teamRecords));
-alert("Game Published!");
+  processTeam(team1.value, team1win.checked, document.querySelector("#team1players"));
+  processTeam(team2.value, team2win.checked, document.querySelector("#team2players"));
+  localStorage.setItem("playersData", JSON.stringify(playersData));
+  localStorage.setItem("teamRecords", JSON.stringify(teamRecords));
+  alert("Game Published!");
 }
 
 function processTeam(teamName, won, container){
-if(!teamRecords[teamName]) teamRecords[teamName]={wins:0, losses:0};
-won ? teamRecords[teamName].wins++ : teamRecords[teamName].losses++;
+  if(!teamRecords[teamName]) teamRecords[teamName]={wins:0, losses:0};
+  won ? teamRecords[teamName].wins++ : teamRecords[teamName].losses++;
 
-let rows = container.querySelectorAll("tr");
-rows.forEach((row,i)=>{
-if(i===0) return;
-let name = row.querySelector(".name").value;
-if(!name) return;
+  let rows = container.querySelectorAll("tr");
+  rows.forEach((row,i)=>{
+    if(i===0) return;
+    let name = row.querySelector(".name").value;
+    if(!name) return;
 
-let stats = {
-pts: +row.querySelector(".pts").value || 0,
-reb: +row.querySelector(".reb").value || 0,
-ast: +row.querySelector(".ast").value || 0,
-stl: +row.querySelector(".stl").value || 0,
-blk: +row.querySelector(".blk").value || 0
-};
+    let stats = {
+      pts: +row.querySelector(".pts").value || 0,
+      reb: +row.querySelector(".reb").value || 0,
+      ast: +row.querySelector(".ast").value || 0,
+      stl: +row.querySelector(".stl").value || 0,
+      blk: +row.querySelector(".blk").value || 0
+    };
 
-if(!playersData[name]){
-playersData[name]={games:0, pts:0, reb:0, ast:0, stl:0, blk:0};
-}
+    if(!playersData[name]){
+      playersData[name]={games:0, pts:0, reb:0, ast:0, stl:0, blk:0};
+    }
 
-playersData[name].games++;
-playersData[name].pts += stats.pts;
-playersData[name].reb += stats.reb;
-playersData[name].ast += stats.ast;
-playersData[name].stl += stats.stl;
-playersData[name].blk += stats.blk;
-});
+    playersData[name].games++;
+    playersData[name].pts += stats.pts;
+    playersData[name].reb += stats.reb;
+    playersData[name].ast += stats.ast;
+    playersData[name].stl += stats.stl;
+    playersData[name].blk += stats.blk;
+  });
 }
 
 function updateSummary(){
-let html = "<h3>Leaders (Per Game Averages)</h3>";
-let leaders = {pts:null, reb:null, ast:null, stl:null, blk:null};
+  let html = "<h3>Leaders (Per Game Averages)</h3>";
+  let leaders = {pts:null, reb:null, ast:null, stl:null, blk:null};
 
-for(let name in playersData){
-let p = playersData[name];
-let avg = {
-pts: p.pts/p.games,
-reb: p.reb/p.games,
-ast: p.ast/p.games,
-stl: p.stl/p.games,
-blk: p.blk/p.games
-};
+  for(let name in playersData){
+    let p = playersData[name];
+    let avg = {
+      pts: p.pts/p.games,
+      reb: p.reb/p.games,
+      ast: p.ast/p.games,
+      stl: p.stl/p.games,
+      blk: p.blk/p.games
+    };
 
-for(let stat in leaders){
-if(!leaders[stat] || avg[stat] > leaders[stat].value){
-leaders[stat]={name:name,value:avg[stat]};
-}
-}
-}
+    for(let stat in leaders){
+      if(!leaders[stat] || avg[stat] > leaders[stat].value){
+        leaders[stat]={name:name,value:avg[stat]};
+      }
+    }
+  }
 
-for(let stat in leaders){
-if(leaders[stat]){
-html += `<p>${stat.toUpperCase()}: ${leaders[stat].name} (${leaders[stat].value.toFixed(1)})</p>`;
-}
-}
+  for(let stat in leaders){
+    if(leaders[stat]){
+      html += `<p>${stat.toUpperCase()}: ${leaders[stat].name} (${leaders[stat].value.toFixed(1)})</p>`;
+    }
+  }
 
-document.getElementById("leaderboard").innerHTML = html;
+  document.getElementById("leaderboard").innerHTML = html;
 
-let recordsHTML="";
-for(let team in teamRecords){
-recordsHTML += `<p>${team}: ${teamRecords[team].wins}W - ${teamRecords[team].losses}L</p>`;
-}
-document.getElementById("teamRecords").innerHTML = recordsHTML;
+  let recordsHTML="";
+  for(let team in teamRecords){
+    recordsHTML += `<p>${team}: ${teamRecords[team].wins}W - ${teamRecords[team].losses}L</p>`;
+  }
+  document.getElementById("teamRecords").innerHTML = recordsHTML;
 }
 
 populateTeams();
