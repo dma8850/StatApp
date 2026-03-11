@@ -77,9 +77,21 @@ Team 2 <select id="eplTeam2"></select>
 </div>
 
 <script>
-// Teams
-const nbaTeams=["Atlanta Hawks","Boston Celtics","Brooklyn Nets","Chicago Bulls","Dallas Mavericks","Denver Nuggets","Golden State Warriors","Los Angeles Lakers","Miami Heat","Milwaukee Bucks","New York Knicks","Phoenix Suns"];
-const eplTeams=["Arsenal","Chelsea","Liverpool","Manchester City","Manchester United","Tottenham","Newcastle","West Ham"];
+// Full NBA Teams
+const nbaTeams=[
+"Atlanta Hawks","Boston Celtics","Brooklyn Nets","Charlotte Hornets","Chicago Bulls","Cleveland Cavaliers",
+"Dallas Mavericks","Denver Nuggets","Detroit Pistons","Golden State Warriors","Houston Rockets","Indiana Pacers",
+"Los Angeles Clippers","Los Angeles Lakers","Memphis Grizzlies","Miami Heat","Milwaukee Bucks","Minnesota Timberwolves",
+"New Orleans Pelicans","New York Knicks","Oklahoma City Thunder","Orlando Magic","Philadelphia 76ers","Phoenix Suns",
+"Portland Trail Blazers","Sacramento Kings","San Antonio Spurs","Toronto Raptors","Utah Jazz","Washington Wizards"
+];
+
+// Full EPL Teams
+const eplTeams=[
+"Arsenal","Aston Villa","Bournemouth","Brentford","Brighton & Hove Albion","Chelsea","Crystal Palace","Everton",
+"Fulham","Liverpool","Luton Town","Manchester City","Manchester United","Newcastle United","Nottingham Forest",
+"Sheffield United","Tottenham Hotspur","West Ham United","Wolverhampton Wanderers","Coventry City"
+];
 
 // Load from localStorage
 let nbaPlayers=JSON.parse(localStorage.getItem("nbaPlayers")||"{}");
@@ -99,6 +111,7 @@ if(id==="summary") updateSummary();
 // Fill team dropdowns
 function fillSelect(id,list){
 let sel=document.getElementById(id);
+sel.innerHTML=""; // clear any existing options
 list.forEach(t=>{let o=document.createElement("option");o.value=t;o.text=t;sel.appendChild(o);});
 }
 
@@ -194,7 +207,6 @@ let blob=new Blob([JSON.stringify({nbaPlayers,nbaTeamRecords,eplPlayers,eplTeamR
 let a=document.createElement("a");
 a.href=URL.createObjectURL(blob);
 a.download="sports_backup_latest.json";
-// trigger download silently
 setTimeout(()=>a.click(),0);
 }
 
