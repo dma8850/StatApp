@@ -70,7 +70,7 @@ Team 2 <select id="eplTeam2"></select>
 <h2>EPL Team Records</h2>
 <div id="eplTeamSummary" class="summary-box"></div>
 
-<button class="publish-btn" onclick="backupData()">Download Backup</button>
+<button class="publish-btn" onclick="manualBackup()">Download Backup</button>
 <label class="publish-btn">Upload Backup
 <input type="file" accept=".json" onchange="restoreData(event)" style="display:none">
 </label>
@@ -149,13 +149,14 @@ w?store[t].wins++:store[t].losses++;
 function publishNBA(){processTable("nbaTable1",["pts","reb","ast"],nbaPlayers);processTable("nbaTable2",["pts","reb","ast"],nbaPlayers);recordTeam("nbaTeam1","nbaWin1",nbaTeamRecords);recordTeam("nbaTeam2","nbaWin2",nbaTeamRecords);saveData();}
 function publishEPL(){processTable("eplTable1",["goals","assists"],eplPlayers);processTable("eplTable2",["goals","assists"],eplPlayers);recordTeam("eplTeam1","eplWin1",eplTeamRecords);recordTeam("eplTeam2","eplWin2",eplTeamRecords);saveData();}
 
-// Save & update summary
+// Save & update summary + rolling backup
 function saveData(){
 localStorage.setItem("nbaPlayers",JSON.stringify(nbaPlayers));
 localStorage.setItem("nbaTeams",JSON.stringify(nbaTeamRecords));
 localStorage.setItem("eplPlayers",JSON.stringify(eplPlayers));
 localStorage.setItem("eplTeams",JSON.stringify(eplTeamRecords));
 updateSummary();
+rollingBackup();
 alert("Published!");
 }
 
@@ -181,11 +182,23 @@ for(let t in eplTeamRecords){let r=eplTeamRecords[t];h+=`${t} ${r.wins}W-${r.los
 document.getElementById("eplTeamSummary").innerHTML=h;
 }
 
-// Backup/Restore
-function backupData(){
+// Manual backup button
+function manualBackup(){
 let blob=new Blob([JSON.stringify({nbaPlayers,nbaTeamRecords,eplPlayers,eplTeamRecords})],{type:"application/json"});
 let a=document.createElement("a");a.href=URL.createObjectURL(blob);a.download="sports_backup.json";a.click();
 }
+
+// Automatic rolling backup
+function rollingBackup(){
+let blob=new Blob([JSON.stringify({nbaPlayers,nbaTeamRecords,eplPlayers,eplTeamRecords})],{type:"application/json"});
+let a=document.createElement("a");
+a.href=URL.createObjectURL(blob);
+a.download="sports_backup_latest.json";
+// trigger download silently
+setTimeout(()=>a.click(),0);
+}
+
+// Restore
 function restoreData(e){
 let f=e.target.files[0];
 let r=new FileReader();
@@ -210,7 +223,7 @@ buildNBATable("nbaTable2");
 buildEPLTable("eplTable1");
 buildEPLTable("eplTable2");
 updateSummary();
-</script>
 
+</script>
 </body>
 </html>
