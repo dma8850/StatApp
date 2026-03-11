@@ -214,6 +214,10 @@ sec.classList.remove("active");
 
 document.getElementById(id).classList.add("active");
 
+if(id==="summary"){
+updateSummary();
+}
+
 }
 
 function fillSelect(id,list){
@@ -263,17 +267,13 @@ for(var i=0;i<10;i++){
 var row=document.createElement("tr");
 
 var nameCell=document.createElement("td");
-
 nameCell.appendChild(document.createElement("input"));
-
 row.appendChild(nameCell);
 
 for(var j=0;j<5;j++){
 
 var cell=document.createElement("td");
-
 cell.appendChild(makeDropdown());
-
 row.appendChild(cell);
 
 }
@@ -295,17 +295,13 @@ for(var i=0;i<11;i++){
 var row=document.createElement("tr");
 
 var nameCell=document.createElement("td");
-
 nameCell.appendChild(document.createElement("input"));
-
 row.appendChild(nameCell);
 
 for(var j=0;j<2;j++){
 
 var cell=document.createElement("td");
-
 cell.appendChild(makeDropdown());
-
 row.appendChild(cell);
 
 }
@@ -347,7 +343,6 @@ store[name][stat]+=val;
 function recordTeam(teamId,winId,store){
 
 var team=document.getElementById(teamId).value;
-
 var win=document.getElementById(winId).checked;
 
 if(!store[team]) store[team]={wins:0,losses:0};
@@ -403,7 +398,6 @@ for(var name in nbaPlayers){
 var p=nbaPlayers[name];
 
 html+="<b>"+name+"</b> ("+p.games+" games)<br>";
-
 html+="PTS "+(p.pts/p.games).toFixed(1)+" ";
 html+="REB "+(p.reb/p.games).toFixed(1)+" ";
 html+="AST "+(p.ast/p.games).toFixed(1)+"<br><br>";
@@ -429,7 +423,6 @@ for(var name in eplPlayers){
 var p=eplPlayers[name];
 
 eplHTML+="<b>"+name+"</b> ("+p.games+" games)<br>";
-
 eplHTML+="Goals "+(p.goals/p.games).toFixed(1)+" ";
 eplHTML+="Assists "+(p.assists/p.games).toFixed(1)+"<br><br>";
 
@@ -463,9 +456,7 @@ var blob=new Blob([JSON.stringify(data)],{type:"application/json"});
 var a=document.createElement("a");
 
 a.href=URL.createObjectURL(blob);
-
 a.download="sports_tracker_backup.json";
-
 a.click();
 
 }
