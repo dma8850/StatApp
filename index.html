@@ -1,15 +1,14 @@
-```html
 <!DOCTYPE html>
 <html>
 <head>
 <meta charset="UTF-8">
 <title>Sports Stat Tracker</title>
-
 <style>
 body{font-family:Arial;margin:0;background:#f4f6f9;}
 header{background:#1d3557;color:white;padding:15px;text-align:center;font-size:22px;}
 nav{display:flex;background:#457b9d;}
 nav button{flex:1;padding:12px;border:none;background:#457b9d;color:white;font-size:16px;cursor:pointer;}
+nav button.active{background:#1d3557;}
 .section{display:none;padding:15px;}
 .section.active{display:block;}
 table{width:100%;border-collapse:collapse;margin-bottom:20px;}
@@ -20,157 +19,198 @@ select{width:100%;}
 .summary-box{max-height:200px;overflow-y:auto;border:1px solid #ccc;padding:10px;background:white;margin-bottom:15px;}
 </style>
 </head>
-
 <body>
 
 <header>Sports Stat Tracker</header>
 
 <nav>
-<button onclick="showTab('nba')">NBA Boxscore</button>
+<button onclick="showTab('nba')" class="active">NBA Boxscore</button>
 <button onclick="showTab('epl')">EPL Match</button>
 <button onclick="showTab('summary')">Summary</button>
 </nav>
 
+<!-- NBA -->
 <div id="nba" class="section active">
 <h2>NBA Boxscore</h2>
-
 Team 1 <select id="nbaTeam1"></select>
 <label><input type="checkbox" id="nbaWin1"> Won</label>
-
 Team 2 <select id="nbaTeam2"></select>
 <label><input type="checkbox" id="nbaWin2"> Won</label>
 
-<h3>Team 1</h3>
+<h3>Team 1 Players</h3>
 <table id="nbaTable1"></table>
-
-<h3>Team 2</h3>
+<h3>Team 2 Players</h3>
 <table id="nbaTable2"></table>
-
 <button class="publish-btn" onclick="publishNBA()">Publish NBA Game</button>
 </div>
 
+<!-- EPL -->
 <div id="epl" class="section">
-
 <h2>EPL Match</h2>
-
 Team 1 <select id="eplTeam1"></select>
 <label><input type="checkbox" id="eplWin1"> Won</label>
-
 Team 2 <select id="eplTeam2"></select>
 <label><input type="checkbox" id="eplWin2"> Won</label>
 
-<h3>Team 1</h3>
+<h3>Team 1 Players</h3>
 <table id="eplTable1"></table>
-
-<h3>Team 2</h3>
+<h3>Team 2 Players</h3>
 <table id="eplTable2"></table>
-
 <button class="publish-btn" onclick="publishEPL()">Publish EPL Match</button>
 </div>
 
+<!-- Summary -->
 <div id="summary" class="section">
-
 <h2>NBA Player Averages</h2>
 <div id="nbaPlayerSummary" class="summary-box"></div>
-
 <h2>NBA Team Records</h2>
 <div id="nbaTeamSummary" class="summary-box"></div>
-
 <h2>EPL Player Averages</h2>
 <div id="eplPlayerSummary" class="summary-box"></div>
-
 <h2>EPL Team Records</h2>
 <div id="eplTeamSummary" class="summary-box"></div>
 
 <button class="publish-btn" onclick="backupData()">Download Backup</button>
-
-<label class="publish-btn">
-Upload Backup
+<label class="publish-btn">Upload Backup
 <input type="file" accept=".json" onchange="restoreData(event)" style="display:none">
 </label>
-
 </div>
 
 <script>
+// Teams
+const nbaTeams=["Atlanta Hawks","Boston Celtics","Brooklyn Nets","Chicago Bulls","Dallas Mavericks","Denver Nuggets","Golden State Warriors","Los Angeles Lakers","Miami Heat","Milwaukee Bucks","New York Knicks","Phoenix Suns"];
+const eplTeams=["Arsenal","Chelsea","Liverpool","Manchester City","Manchester United","Tottenham","Newcastle","West Ham"];
 
-const nbaTeams=[
-"Atlanta Hawks","Boston Celtics","Brooklyn Nets","Chicago Bulls",
-"Dallas Mavericks","Denver Nuggets","Golden State Warriors",
-"Los Angeles Lakers","Miami Heat","Milwaukee Bucks",
-"New York Knicks","Phoenix Suns"
-];
-
-const eplTeams=[
-"Arsenal","Chelsea","Liverpool","Manchester City",
-"Manchester United","Tottenham","Newcastle","West Ham"
-];
-
+// Load from localStorage
 let nbaPlayers=JSON.parse(localStorage.getItem("nbaPlayers")||"{}");
-let nbaTeamsRec=JSON.parse(localStorage.getItem("nbaTeams")||"{}");
-
+let nbaTeamRecords=JSON.parse(localStorage.getItem("nbaTeams")||"{}");
 let eplPlayers=JSON.parse(localStorage.getItem("eplPlayers")||"{}");
-let eplTeamsRec=JSON.parse(localStorage.getItem("eplTeams")||"{}");
+let eplTeamRecords=JSON.parse(localStorage.getItem("eplTeams")||"{}");
 
+// Tab switching
 function showTab(id){
 document.querySelectorAll(".section").forEach(s=>s.classList.remove("active"));
 document.getElementById(id).classList.add("active");
+document.querySelectorAll("nav button").forEach(b=>b.classList.remove("active"));
+document.querySelector(`nav button[onclick="showTab('${id}')"]`).classList.add("active");
 if(id==="summary") updateSummary();
 }
 
+// Fill team dropdowns
 function fillSelect(id,list){
 let sel=document.getElementById(id);
-list.forEach(t=>{
-let o=document.createElement("option");
-o.value=t;
-o.text=t;
-sel.appendChild(o);
-});
+list.forEach(t=>{let o=document.createElement("option");o.value=t;o.text=t;sel.appendChild(o);});
 }
 
-function dropdown(){
-let s=document.createElement("select");
-for(let i=0;i<=100;i++){
-let o=document.createElement("option");
-o.value=i;
-o.text=i;
-s.appendChild(o);
-}
-return s;
-}
+// Create 0-100 dropdown
+function dropdown(){let s=document.createElement("select");for(let i=0;i<=100;i++){let o=document.createElement("option");o.value=i;o.text=i;s.appendChild(o);}return s;}
 
+// Build tables
 function buildNBATable(id){
 let t=document.getElementById(id);
 t.innerHTML="<tr><th>Name</th><th>PTS</th><th>REB</th><th>AST</th></tr>";
 for(let i=0;i<10;i++){
 let r=document.createElement("tr");
-let c=document.createElement("td");
-c.appendChild(document.createElement("input"));
-r.appendChild(c);
-for(let j=0;j<3;j++){
-let td=document.createElement("td");
-td.appendChild(dropdown());
-r.appendChild(td);
+let c=document.createElement("td");c.appendChild(document.createElement("input"));r.appendChild(c);
+for(let j=0;j<3;j++){let td=document.createElement("td");td.appendChild(dropdown());r.appendChild(td);}
+t.appendChild(r);}
 }
-t.appendChild(r);
-}
-}
-
 function buildEPLTable(id){
 let t=document.getElementById(id);
 t.innerHTML="<tr><th>Name</th><th>Goals</th><th>Assists</th></tr>";
 for(let i=0;i<11;i++){
 let r=document.createElement("tr");
-let c=document.createElement("td");
-c.appendChild(document.createElement("input"));
-r.appendChild(c);
-for(let j=0;j<2;j++){
-let td=document.createElement("td");
-td.appendChild(dropdown());
-r.appendChild(td);
+let c=document.createElement("td");c.appendChild(document.createElement("input"));r.appendChild(c);
+for(let j=0;j<2;j++){let td=document.createElement("td");td.appendChild(dropdown());r.appendChild(td);}
+t.appendChild(r);}
 }
-t.appendChild(r);
+
+// Process table
+function processTable(id,stats,store){
+let rows=document.getElementById(id).rows;
+for(let i=1;i<rows.length;i++){
+let name=rows[i].cells[0].children[0].value;
+if(!name) continue;
+if(!store[name]) store[name]={games:0};
+store[name].games++;
+stats.forEach((s,j)=>{let val=parseInt(rows[i].cells[j+1].children[0].value)||0;store[name][s]=(store[name][s]||0)+val;});
 }
 }
 
-function processTable(id,stats,stor
-```
+// Record team win/loss
+function recordTeam(id,win,store){
+let t=document.getElementById(id).value;
+let w=document.getElementById(win).checked;
+if(!store[t]) store[t]={wins:0,losses:0};
+w?store[t].wins++:store[t].losses++;
+}
+
+// Publish
+function publishNBA(){processTable("nbaTable1",["pts","reb","ast"],nbaPlayers);processTable("nbaTable2",["pts","reb","ast"],nbaPlayers);recordTeam("nbaTeam1","nbaWin1",nbaTeamRecords);recordTeam("nbaTeam2","nbaWin2",nbaTeamRecords);saveData();}
+function publishEPL(){processTable("eplTable1",["goals","assists"],eplPlayers);processTable("eplTable2",["goals","assists"],eplPlayers);recordTeam("eplTeam1","eplWin1",eplTeamRecords);recordTeam("eplTeam2","eplWin2",eplTeamRecords);saveData();}
+
+// Save & update summary
+function saveData(){
+localStorage.setItem("nbaPlayers",JSON.stringify(nbaPlayers));
+localStorage.setItem("nbaTeams",JSON.stringify(nbaTeamRecords));
+localStorage.setItem("eplPlayers",JSON.stringify(eplPlayers));
+localStorage.setItem("eplTeams",JSON.stringify(eplTeamRecords));
+updateSummary();
+alert("Published!");
+}
+
+// Safe average helper
+function avg(v,g){return g? (v/g).toFixed(1):"0.0";}
+
+// Update summary
+function updateSummary(){
+let h="";
+for(let p in nbaPlayers){let d=nbaPlayers[p];h+=`<b>${p}</b> (games: ${d.games})<br>PTS ${avg(d.pts||0,d.games)} REB ${avg(d.reb||0,d.games)} AST ${avg(d.ast||0,d.games)}<br><br>`;}
+document.getElementById("nbaPlayerSummary").innerHTML=h;
+
+h="";
+for(let t in nbaTeamRecords){let r=nbaTeamRecords[t];h+=`${t} ${r.wins}W-${r.losses}L<br>`;}
+document.getElementById("nbaTeamSummary").innerHTML=h;
+
+h="";
+for(let p in eplPlayers){let d=eplPlayers[p];h+=`<b>${p}</b> (games: ${d.games})<br>Goals ${avg(d.goals||0,d.games)} Assists ${avg(d.assists||0,d.games)}<br><br>`;}
+document.getElementById("eplPlayerSummary").innerHTML=h;
+
+h="";
+for(let t in eplTeamRecords){let r=eplTeamRecords[t];h+=`${t} ${r.wins}W-${r.losses}L<br>`;}
+document.getElementById("eplTeamSummary").innerHTML=h;
+}
+
+// Backup/Restore
+function backupData(){
+let blob=new Blob([JSON.stringify({nbaPlayers,nbaTeamRecords,eplPlayers,eplTeamRecords})],{type:"application/json"});
+let a=document.createElement("a");a.href=URL.createObjectURL(blob);a.download="sports_backup.json";a.click();
+}
+function restoreData(e){
+let f=e.target.files[0];
+let r=new FileReader();
+r.onload=function(){
+let d=JSON.parse(r.result);
+nbaPlayers=d.nbaPlayers||{};
+nbaTeamRecords=d.nbaTeamRecords||{};
+eplPlayers=d.eplPlayers||{};
+eplTeamRecords=d.eplTeamRecords||{};
+saveData();
+};
+r.readAsText(f);
+}
+
+// Initialize
+fillSelect("nbaTeam1",nbaTeams);
+fillSelect("nbaTeam2",nbaTeams);
+fillSelect("eplTeam1",eplTeams);
+fillSelect("eplTeam2",eplTeams);
+buildNBATable("nbaTable1");
+buildNBATable("nbaTable2");
+buildEPLTable("eplTable1");
+buildEPLTable("eplTable2");
+updateSummary();
+</script>
+
+</body>
+</html>
