@@ -77,7 +77,7 @@ Team 2 <select id="eplTeam2"></select>
 </div>
 
 <script>
-// Full NBA Teams
+// Full team lists (forced)
 const nbaTeams=[
 "Atlanta Hawks","Boston Celtics","Brooklyn Nets","Charlotte Hornets","Chicago Bulls","Cleveland Cavaliers",
 "Dallas Mavericks","Denver Nuggets","Detroit Pistons","Golden State Warriors","Houston Rockets","Indiana Pacers",
@@ -86,14 +86,13 @@ const nbaTeams=[
 "Portland Trail Blazers","Sacramento Kings","San Antonio Spurs","Toronto Raptors","Utah Jazz","Washington Wizards"
 ];
 
-// Full EPL Teams
 const eplTeams=[
 "Arsenal","Aston Villa","Bournemouth","Brentford","Brighton & Hove Albion","Chelsea","Crystal Palace","Everton",
 "Fulham","Liverpool","Luton Town","Manchester City","Manchester United","Newcastle United","Nottingham Forest",
 "Sheffield United","Tottenham Hotspur","West Ham United","Wolverhampton Wanderers","Coventry City"
 ];
 
-// Load from localStorage
+// Load stored data or empty objects
 let nbaPlayers=JSON.parse(localStorage.getItem("nbaPlayers")||"{}");
 let nbaTeamRecords=JSON.parse(localStorage.getItem("nbaTeams")||"{}");
 let eplPlayers=JSON.parse(localStorage.getItem("eplPlayers")||"{}");
@@ -108,14 +107,14 @@ document.querySelector(`nav button[onclick="showTab('${id}')"]`).classList.add("
 if(id==="summary") updateSummary();
 }
 
-// Fill team dropdowns
+// Force-fill team dropdowns every time
 function fillSelect(id,list){
 let sel=document.getElementById(id);
-sel.innerHTML=""; // clear any existing options
+sel.innerHTML="";
 list.forEach(t=>{let o=document.createElement("option");o.value=t;o.text=t;sel.appendChild(o);});
 }
 
-// Create 0-100 dropdown
+// 0-100 dropdown
 function dropdown(){let s=document.createElement("select");for(let i=0;i<=100;i++){let o=document.createElement("option");o.value=i;o.text=i;s.appendChild(o);}return s;}
 
 // Build tables
@@ -128,6 +127,7 @@ let c=document.createElement("td");c.appendChild(document.createElement("input")
 for(let j=0;j<3;j++){let td=document.createElement("td");td.appendChild(dropdown());r.appendChild(td);}
 t.appendChild(r);}
 }
+
 function buildEPLTable(id){
 let t=document.getElementById(id);
 t.innerHTML="<tr><th>Name</th><th>Goals</th><th>Assists</th></tr>";
@@ -170,10 +170,9 @@ localStorage.setItem("eplPlayers",JSON.stringify(eplPlayers));
 localStorage.setItem("eplTeams",JSON.stringify(eplTeamRecords));
 updateSummary();
 rollingBackup();
-alert("Published!");
 }
 
-// Safe average helper
+// Safe average
 function avg(v,g){return g? (v/g).toFixed(1):"0.0";}
 
 // Update summary
@@ -195,13 +194,13 @@ for(let t in eplTeamRecords){let r=eplTeamRecords[t];h+=`${t} ${r.wins}W-${r.los
 document.getElementById("eplTeamSummary").innerHTML=h;
 }
 
-// Manual backup button
+// Manual backup
 function manualBackup(){
 let blob=new Blob([JSON.stringify({nbaPlayers,nbaTeamRecords,eplPlayers,eplTeamRecords})],{type:"application/json"});
 let a=document.createElement("a");a.href=URL.createObjectURL(blob);a.download="sports_backup.json";a.click();
 }
 
-// Automatic rolling backup
+// Rolling backup
 function rollingBackup(){
 let blob=new Blob([JSON.stringify({nbaPlayers,nbaTeamRecords,eplPlayers,eplTeamRecords})],{type:"application/json"});
 let a=document.createElement("a");
@@ -225,17 +224,18 @@ saveData();
 r.readAsText(f);
 }
 
-// Initialize
+// Initialize dropdowns & tables
 fillSelect("nbaTeam1",nbaTeams);
 fillSelect("nbaTeam2",nbaTeams);
 fillSelect("eplTeam1",eplTeams);
 fillSelect("eplTeam2",eplTeams);
+
 buildNBATable("nbaTable1");
 buildNBATable("nbaTable2");
 buildEPLTable("eplTable1");
 buildEPLTable("eplTable2");
-updateSummary();
 
+updateSummary();
 </script>
 </body>
 </html>
