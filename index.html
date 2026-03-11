@@ -5,90 +5,91 @@
 <title>Sports Stat Tracker</title>
 
 <style>
-body {
-  font-family: Arial;
-  margin:0;
-  background:#f4f6f9;
+
+body{
+font-family:Arial;
+margin:0;
+background:#f4f6f9;
 }
 
-header {
-  background:#1d3557;
-  color:white;
-  padding:15px;
-  text-align:center;
-  font-size:22px;
+header{
+background:#1d3557;
+color:white;
+padding:15px;
+text-align:center;
+font-size:22px;
 }
 
-nav {
-  display:flex;
-  background:#457b9d;
+nav{
+display:flex;
+background:#457b9d;
 }
 
-nav button {
-  flex:1;
-  padding:12px;
-  border:none;
-  background:#457b9d;
-  color:white;
-  font-size:16px;
-  cursor:pointer;
+nav button{
+flex:1;
+padding:12px;
+border:none;
+background:#457b9d;
+color:white;
+font-size:16px;
+cursor:pointer;
 }
 
-nav button.active {
-  background:#1d3557;
+nav button.active{
+background:#1d3557;
 }
 
-.section {
-  display:none;
-  padding:15px;
+.section{
+display:none;
+padding:15px;
 }
 
-.section.active {
-  display:block;
+.section.active{
+display:block;
 }
 
-table {
-  width:100%;
-  border-collapse:collapse;
-  margin-bottom:20px;
+table{
+width:100%;
+border-collapse:collapse;
+margin-bottom:20px;
 }
 
-th, td {
-  border:1px solid #ccc;
-  padding:6px;
-  text-align:center;
+th,td{
+border:1px solid #ccc;
+padding:6px;
+text-align:center;
 }
 
-input {
-  width:90%;
-  padding:4px;
+input{
+width:90%;
 }
 
-select {
-  width:100%;
+select{
+width:100%;
 }
 
-.publish-btn {
-  width:100%;
-  padding:14px;
-  background:#1d3557;
-  color:white;
-  border:none;
-  font-size:16px;
-  margin-top:10px;
-  cursor:pointer;
-  display:block;
-  text-align:center;
+.publish-btn{
+width:100%;
+padding:14px;
+background:#1d3557;
+color:white;
+border:none;
+font-size:16px;
+margin-top:10px;
+cursor:pointer;
+display:block;
+text-align:center;
 }
 
-.summary-box {
-  max-height:200px;
-  overflow-y:auto;
-  border:1px solid #ccc;
-  padding:10px;
-  background:white;
-  margin-bottom:15px;
+.summary-box{
+max-height:200px;
+overflow-y:auto;
+border:1px solid #ccc;
+padding:10px;
+background:white;
+margin-bottom:15px;
 }
+
 </style>
 </head>
 
@@ -97,9 +98,9 @@ select {
 <header>Sports Stat Tracker</header>
 
 <nav>
-<button id="btnNBA" class="active" onclick="showTab('nba')">NBA Boxscore</button>
-<button id="btnEPL" onclick="showTab('epl')">EPL Match</button>
-<button id="btnSummary" onclick="showTab('summary')">Summary</button>
+<button onclick="showTab('nba')" class="active">NBA Boxscore</button>
+<button onclick="showTab('epl')">EPL Match</button>
+<button onclick="showTab('summary')">Summary</button>
 </nav>
 
 <!-- NBA -->
@@ -155,16 +156,16 @@ Team 2
 <div id="summary" class="section">
 
 <h2>NBA Player Averages</h2>
-<div class="summary-box" id="nbaPlayerSummary"></div>
+<div id="nbaPlayerSummary" class="summary-box"></div>
 
 <h2>NBA Team Records</h2>
-<div class="summary-box" id="nbaTeamSummary"></div>
+<div id="nbaTeamSummary" class="summary-box"></div>
 
 <h2>EPL Player Averages</h2>
-<div class="summary-box" id="eplPlayerSummary"></div>
+<div id="eplPlayerSummary" class="summary-box"></div>
 
 <h2>EPL Team Records</h2>
-<div class="summary-box" id="eplTeamSummary"></div>
+<div id="eplTeamSummary" class="summary-box"></div>
 
 <button class="publish-btn" onclick="backupData()">Download Backup</button>
 
@@ -199,17 +200,17 @@ var eplTeams=[
 
 var nbaPlayers=JSON.parse(localStorage.getItem("nbaPlayers")||"{}");
 var nbaTeamRecords=JSON.parse(localStorage.getItem("nbaTeams")||"{}");
+
 var eplPlayers=JSON.parse(localStorage.getItem("eplPlayers")||"{}");
 var eplTeamRecords=JSON.parse(localStorage.getItem("eplTeams")||"{}");
 
-var lastRoster=JSON.parse(localStorage.getItem("lastRoster")||'{"NBA":{},"EPL":{}}');
-
 function showTab(id){
 
-var sections=document.getElementsByClassName("section");
+var sections=document.querySelectorAll(".section");
 
-for(var i=0;i<sections.length;i++)
-sections[i].classList.remove("active");
+sections.forEach(function(sec){
+sec.classList.remove("active");
+});
 
 document.getElementById(id).classList.add("active");
 
@@ -315,39 +316,9 @@ table.appendChild(row);
 
 }
 
-function publishNBA(){
+function processTable(tableId,stats,store){
 
-processTable("nbaTable1",["pts","reb","ast","stl","blk"],nbaPlayers);
-processTable("nbaTable2",["pts","reb","ast","stl","blk"],nbaPlayers);
-
-recordTeam("nbaTeam1","nbaWin1",nbaTeamRecords);
-recordTeam("nbaTeam2","nbaWin2",nbaTeamRecords);
-
-saveRoster("nbaTable1","NBA","nbaTeam1");
-saveRoster("nbaTable2","NBA","nbaTeam2");
-
-saveData();
-
-}
-
-function publishEPL(){
-
-processTable("eplTable1",["goals","assists"],eplPlayers);
-processTable("eplTable2",["goals","assists"],eplPlayers);
-
-recordTeam("eplTeam1","eplWin1",eplTeamRecords);
-recordTeam("eplTeam2","eplWin2",eplTeamRecords);
-
-saveRoster("eplTable1","EPL","eplTeam1");
-saveRoster("eplTable2","EPL","eplTeam2");
-
-saveData();
-
-}
-
-function processTable(id,stats,store){
-
-var rows=document.getElementById(id).rows;
+var rows=document.getElementById(tableId).rows;
 
 for(var i=1;i<rows.length;i++){
 
@@ -359,15 +330,15 @@ if(!store[name]) store[name]={games:0};
 
 store[name].games++;
 
-for(var j=0;j<stats.length;j++){
+stats.forEach(function(stat,index){
 
-var val=parseInt(rows[i].cells[j+1].children[0].value);
+var val=parseInt(rows[i].cells[index+1].children[0].value);
 
-if(!store[name][stats[j]]) store[name][stats[j]]=0;
+if(!store[name][stat]) store[name][stat]=0;
 
-store[name][stats[j]]+=val;
+store[name][stat]+=val;
 
-}
+});
 
 }
 
@@ -386,23 +357,27 @@ else store[team].losses++;
 
 }
 
-function saveRoster(tableId,sport,teamSelectId){
+function publishNBA(){
 
-var table=document.getElementById(tableId);
+processTable("nbaTable1",["pts","reb","ast","stl","blk"],nbaPlayers);
+processTable("nbaTable2",["pts","reb","ast","stl","blk"],nbaPlayers);
 
-var roster=[];
+recordTeam("nbaTeam1","nbaWin1",nbaTeamRecords);
+recordTeam("nbaTeam2","nbaWin2",nbaTeamRecords);
 
-for(var i=1;i<table.rows.length;i++){
-
-roster.push(table.rows[i].cells[0].children[0].value||"");
+saveData();
 
 }
 
-var teamName=document.getElementById(teamSelectId).value;
+function publishEPL(){
 
-lastRoster[sport][teamName]=roster;
+processTable("eplTable1",["goals","assists"],eplPlayers);
+processTable("eplTable2",["goals","assists"],eplPlayers);
 
-localStorage.setItem("lastRoster",JSON.stringify(lastRoster));
+recordTeam("eplTeam1","eplWin1",eplTeamRecords);
+recordTeam("eplTeam2","eplWin2",eplTeamRecords);
+
+saveData();
 
 }
 
@@ -425,11 +400,13 @@ var html="";
 
 for(var name in nbaPlayers){
 
-html+="<b>"+name+"</b><br>";
-
 var p=nbaPlayers[name];
 
-html+="PTS "+(p.pts/p.games).toFixed(1)+" REB "+(p.reb/p.games).toFixed(1)+" AST "+(p.ast/p.games).toFixed(1)+"<br><br>";
+html+="<b>"+name+"</b> ("+p.games+" games)<br>";
+
+html+="PTS "+(p.pts/p.games).toFixed(1)+" ";
+html+="REB "+(p.reb/p.games).toFixed(1)+" ";
+html+="AST "+(p.ast/p.games).toFixed(1)+"<br><br>";
 
 }
 
@@ -437,27 +414,51 @@ document.getElementById("nbaPlayerSummary").innerHTML=html;
 
 html="";
 
-for(var t in nbaTeamRecords){
+for(var team in nbaTeamRecords){
 
-html+=t+" "+nbaTeamRecords[t].wins+"W-"+nbaTeamRecords[t].losses+"L<br>";
+html+=team+" "+nbaTeamRecords[team].wins+"W-"+nbaTeamRecords[team].losses+"L<br>";
 
 }
 
 document.getElementById("nbaTeamSummary").innerHTML=html;
 
+var eplHTML="";
+
+for(var name in eplPlayers){
+
+var p=eplPlayers[name];
+
+eplHTML+="<b>"+name+"</b> ("+p.games+" games)<br>";
+
+eplHTML+="Goals "+(p.goals/p.games).toFixed(1)+" ";
+eplHTML+="Assists "+(p.assists/p.games).toFixed(1)+"<br><br>";
+
+}
+
+document.getElementById("eplPlayerSummary").innerHTML=eplHTML;
+
+var teamHTML="";
+
+for(var team in eplTeamRecords){
+
+teamHTML+=team+" "+eplTeamRecords[team].wins+"W-"+eplTeamRecords[team].losses+"L<br>";
+
+}
+
+document.getElementById("eplTeamSummary").innerHTML=teamHTML;
+
 }
 
 function backupData(){
 
-var blob=new Blob([JSON.stringify({
-
+var data={
 nbaPlayers:nbaPlayers,
 nbaTeams:nbaTeamRecords,
 eplPlayers:eplPlayers,
-eplTeams:eplTeamRecords,
-lastRoster:lastRoster
+eplTeams:eplTeamRecords
+};
 
-})],{type:"application/json"});
+var blob=new Blob([JSON.stringify(data)],{type:"application/json"});
 
 var a=document.createElement("a");
 
@@ -479,11 +480,10 @@ reader.onload=function(){
 
 var data=JSON.parse(reader.result);
 
-nbaPlayers=data.nbaPlayers;
-nbaTeamRecords=data.nbaTeams;
-eplPlayers=data.eplPlayers;
-eplTeamRecords=data.eplTeams;
-lastRoster=data.lastRoster;
+nbaPlayers=data.nbaPlayers||{};
+nbaTeamRecords=data.nbaTeams||{};
+eplPlayers=data.eplPlayers||{};
+eplTeamRecords=data.eplTeams||{};
 
 saveData();
 
@@ -495,6 +495,7 @@ reader.readAsText(file);
 
 fillSelect("nbaTeam1",nbaTeams);
 fillSelect("nbaTeam2",nbaTeams);
+
 fillSelect("eplTeam1",eplTeams);
 fillSelect("eplTeam2",eplTeams);
 
