@@ -158,20 +158,16 @@ return s;
 function buildNBATable(id){
 let t=document.getElementById(id);
 t.innerHTML="<tr><th>Name</th><th>PTS</th><th>REB</th><th>AST</th></tr>";
-
 for(let i=0;i<10;i++){
 let r=document.createElement("tr");
-
 let c=document.createElement("td");
 c.appendChild(document.createElement("input"));
 r.appendChild(c);
-
 for(let j=0;j<3;j++){
 let td=document.createElement("td");
 td.appendChild(dropdown());
 r.appendChild(td);
 }
-
 t.appendChild(r);
 }
 }
@@ -179,25 +175,21 @@ t.appendChild(r);
 function buildEPLTable(id){
 let t=document.getElementById(id);
 t.innerHTML="<tr><th>Name</th><th>Goals</th><th>Assists</th></tr>";
-
 for(let i=0;i<11;i++){
 let r=document.createElement("tr");
-
 let c=document.createElement("td");
 c.appendChild(document.createElement("input"));
 r.appendChild(c);
-
 for(let j=0;j<2;j++){
 let td=document.createElement("td");
 td.appendChild(dropdown());
 r.appendChild(td);
 }
-
 t.appendChild(r);
 }
 }
 
-/* ---------------- CORE LOGIC ---------------- */
+/* ---------------- LOGIC ---------------- */
 
 function processTable(id,stats,store){
 let rows=document.getElementById(id).rows;
