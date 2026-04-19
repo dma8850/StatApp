@@ -3,6 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <title>Sports Stat Tracker</title>
+
 <style>
 body{font-family:Arial;margin:0;background:#f4f6f9;}
 header{background:#1d3557;color:white;padding:15px;text-align:center;font-size:22px;}
@@ -18,7 +19,9 @@ select{width:100%;}
 .publish-btn{width:100%;padding:14px;background:#1d3557;color:white;border:none;font-size:16px;margin-top:10px;cursor:pointer;}
 .summary-box{max-height:200px;overflow-y:auto;border:1px solid #ccc;padding:10px;background:white;margin-bottom:15px;}
 </style>
+
 </head>
+
 <body>
 
 <header>Sports Stat Tracker</header>
@@ -101,7 +104,9 @@ Upload Backup
 
 <script>
 
-/* ---------------- TEAM LISTS (FIXED) ---------------- */
+window.addEventListener("DOMContentLoaded", () => {
+
+/* ---------------- TEAMS ---------------- */
 
 const nbaTeams = [
 "Atlanta Hawks","Boston Celtics","Brooklyn Nets","Charlotte Hornets","Chicago Bulls","Cleveland Cavaliers",
@@ -124,7 +129,26 @@ let nbaTeamRecords = JSON.parse(localStorage.getItem("nbaTeams") || "{}");
 let eplPlayers = JSON.parse(localStorage.getItem("eplPlayers") || "{}");
 let eplTeamRecords = JSON.parse(localStorage.getItem("eplTeams") || "{}");
 
-/* ---------------- TAB SWITCH ---------------- */
+/* ---------------- SAFE INIT ---------------- */
+
+function init(){
+fillSelect("nbaTeam1", nbaTeams);
+fillSelect("nbaTeam2", nbaTeams);
+fillSelect("eplTeam1", eplTeams);
+fillSelect("eplTeam2", eplTeams);
+
+buildNBATable("nbaTable1");
+buildNBATable("nbaTable2");
+buildEPLTable("eplTable1");
+buildEPLTable("eplTable2");
+
+updateSummary();
+updateStandings();
+}
+
+init();
+
+/* ---------------- NAV ---------------- */
 
 function showTab(id){
 document.querySelectorAll(".section").forEach(s=>s.classList.remove("active"));
@@ -137,16 +161,17 @@ if(id==="summary") updateSummary();
 if(id==="standings") updateStandings();
 }
 
-/* ---------------- DROPDOWNS (FIX) ---------------- */
+/* ---------------- DROPDOWNS ---------------- */
 
-function fillSelect(id, list){
-const sel = document.getElementById(id);
-sel.innerHTML = "";
+function fillSelect(id,list){
+const el=document.getElementById(id);
+if(!el) return;
+el.innerHTML="";
 list.forEach(t=>{
 const o=document.createElement("option");
 o.value=t;
 o.textContent=t;
-sel.appendChild(o);
+el.appendChild(o);
 });
 }
 
@@ -205,9 +230,9 @@ t.appendChild(r);
 }
 }
 
-/* ---------------- PROCESSING ---------------- */
+/* ---------------- LOGIC ---------------- */
 
-function processTable(id, stats, store){
+function processTable(id,stats,store){
 let rows=document.getElementById(id).rows;
 
 for(let i=1;i<rows.length;i++){
@@ -224,7 +249,7 @@ store[name][s]=(store[name][s]||0)+val;
 }
 }
 
-function recordTeam(id, win, store){
+function recordTeam(id,win,store){
 let team=document.getElementById(id).value;
 let w=document.getElementById(win).checked;
 
@@ -267,7 +292,6 @@ updateSummary();
 function avg(v,g){return g?(v/g).toFixed(1):"0.0";}
 
 function updateSummary(){
-
 let h="";
 for(let p in nbaPlayers){
 let d=nbaPlayers[p];
@@ -301,28 +325,27 @@ document.getElementById("eplTeamSummary").innerHTML=h;
 
 function updateStandings(){
 
-let nba = Object.entries(nbaTeamRecords)
+let nba=Object.entries(nbaTeamRecords)
 .map(([team,r])=>({team,w:r.wins,l:r.losses}))
 .sort((a,b)=>b.w-a.w);
 
-let html="<table><tr><th>Team</th><th>W</th><th>L</th></tr>";
+let h="<table><tr><th>Team</th><th>W</th><th>L</th></tr>";
 nba.forEach(t=>{
-html+=`<tr><td>${t.team}</td><td>${t.w}</td><td>${t.l}</td></tr>`;
+h+=`<tr><td>${t.team}</td><td>${t.w}</td><td>${t.l}</td></tr>`;
 });
-html+="</table>";
-document.getElementById("nbaStandings").innerHTML=html;
+h+="</table>";
+document.getElementById("nbaStandings").innerHTML=h;
 
-let epl = Object.entries(eplTeamRecords)
+let epl=Object.entries(eplTeamRecords)
 .map(([team,r])=>({team,w:r.wins,l:r.losses}))
 .sort((a,b)=>b.w-a.w);
 
-html="<table><tr><th>Team</th><th>W</th><th>L</th></tr>";
+h="<table><tr><th>Team</th><th>W</th><th>L</th></tr>";
 epl.forEach(t=>{
-html+=`<tr><td>${t.team}</td><td>${t.w}</td><td>${t.l}</td></tr>`;
+h+=`<tr><td>${t.team}</td><td>${t.w}</td><td>${t.l}</td></tr>`;
 });
-html+="</table>";
-document.getElementById("eplStandings").innerHTML=html;
-
+h+="</table>";
+document.getElementById("eplStandings").innerHTML=h;
 }
 
 /* ---------------- BACKUP ---------------- */
@@ -351,20 +374,9 @@ saveData();
 r.readAsText(f);
 }
 
-/* ---------------- INIT ---------------- */
-
-fillSelect("nbaTeam1", nbaTeams);
-fillSelect("nbaTeam2", nbaTeams);
-fillSelect("eplTeam1", eplTeams);
-fillSelect("eplTeam2", eplTeams);
-
-buildNBATable("nbaTable1");
-buildNBATable("nbaTable2");
-buildEPLTable("eplTable1");
-buildEPLTable("eplTable2");
-
-updateSummary();
+}); // DOMContentLoaded
 
 </script>
+
 </body>
 </html>
