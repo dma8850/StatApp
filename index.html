@@ -85,7 +85,6 @@ Team 2 <select id="eplTeam2"></select>
 <div id="eplTeamSummary" class="summary-box"></div>
 
 <button class="publish-btn" onclick="manualBackup()">Download Backup</button>
-
 <label class="publish-btn">
 Upload Backup
 <input type="file" accept=".json" onchange="restoreData(event)" style="display:none">
@@ -94,7 +93,7 @@ Upload Backup
 
 <script>
 
-/* ---------------- TEAM LISTS ---------------- */
+/* ---------------- DATA ---------------- */
 
 const nbaTeams = [
 "Atlanta Hawks","Boston Celtics","Brooklyn Nets","Charlotte Hornets","Chicago Bulls","Cleveland Cavaliers",
@@ -110,37 +109,44 @@ const eplTeams = [
 "Sheffield United","Tottenham Hotspur","West Ham United","Wolverhampton Wanderers","Burnley"
 ];
 
-/* ---------------- STORAGE ---------------- */
+/* ---------------- STATE ---------------- */
 
 let nbaPlayers = JSON.parse(localStorage.getItem("nbaPlayers") || "{}");
 let nbaTeamRecords = JSON.parse(localStorage.getItem("nbaTeams") || "{}");
 let eplPlayers = JSON.parse(localStorage.getItem("eplPlayers") || "{}");
 let eplTeamRecords = JSON.parse(localStorage.getItem("eplTeams") || "{}");
 
-/* ---------------- NAV ---------------- */
+/* ---------------- TAB ---------------- */
 
 function showTab(id){
 document.querySelectorAll(".section").forEach(s=>s.classList.remove("active"));
 document.getElementById(id).classList.add("active");
 
 document.querySelectorAll("nav button").forEach(b=>b.classList.remove("active"));
-document.querySelector(`nav button[onclick="showTab('${id}')"]`).classList.add("active");
+event.target.classList.add("active");
 
 if(id==="summary") updateSummary();
 }
 
-/* ---------------- DROPDOWNS ---------------- */
+/* ---------------- INIT DROPDOWNS (KEY FIX) ---------------- */
 
 function fillSelect(id,list){
 const el=document.getElementById(id);
+if(!el) return;
 el.innerHTML="";
 list.forEach(t=>{
-const o=document.createElement("option");
-o.value=t;
-o.textContent=t;
-el.appendChild(o);
+const opt=document.createElement("option");
+opt.value=t;
+opt.textContent=t;
+el.appendChild(opt);
 });
 }
+
+/* run immediately AFTER DOM exists (but not wrapped) */
+fillSelect("nbaTeam1",nbaTeams);
+fillSelect("nbaTeam2",nbaTeams);
+fillSelect("eplTeam1",eplTeams);
+fillSelect("eplTeam2",eplTeams);
 
 /* ---------------- TABLES ---------------- */
 
@@ -158,16 +164,20 @@ return s;
 function buildNBATable(id){
 let t=document.getElementById(id);
 t.innerHTML="<tr><th>Name</th><th>PTS</th><th>REB</th><th>AST</th></tr>";
+
 for(let i=0;i<10;i++){
 let r=document.createElement("tr");
+
 let c=document.createElement("td");
 c.appendChild(document.createElement("input"));
 r.appendChild(c);
+
 for(let j=0;j<3;j++){
 let td=document.createElement("td");
 td.appendChild(dropdown());
 r.appendChild(td);
 }
+
 t.appendChild(r);
 }
 }
@@ -175,21 +185,25 @@ t.appendChild(r);
 function buildEPLTable(id){
 let t=document.getElementById(id);
 t.innerHTML="<tr><th>Name</th><th>Goals</th><th>Assists</th></tr>";
+
 for(let i=0;i<11;i++){
 let r=document.createElement("tr");
+
 let c=document.createElement("td");
 c.appendChild(document.createElement("input"));
 r.appendChild(c);
+
 for(let j=0;j<2;j++){
 let td=document.createElement("td");
 td.appendChild(dropdown());
 r.appendChild(td);
 }
+
 t.appendChild(r);
 }
 }
 
-/* ---------------- LOGIC ---------------- */
+/* ---------------- CORE ---------------- */
 
 function processTable(id,stats,store){
 let rows=document.getElementById(id).rows;
@@ -235,7 +249,7 @@ recordTeam("eplTeam2","eplWin2",eplTeamRecords);
 saveData();
 }
 
-/* ---------------- SAVE ---------------- */
+/* ---------------- SAVE + SUMMARY ---------------- */
 
 function saveData(){
 localStorage.setItem("nbaPlayers",JSON.stringify(nbaPlayers));
@@ -245,8 +259,6 @@ localStorage.setItem("eplTeams",JSON.stringify(eplTeamRecords));
 
 updateSummary();
 }
-
-/* ---------------- SUMMARY ---------------- */
 
 function avg(v,g){return g?(v/g).toFixed(1):"0.0";}
 
